@@ -1,12 +1,11 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { type LoginFormValues } from "@/utils/zodSchema";
-// import { authService, type AuthResponse } from "@/services/authService"; ini digunakan ketika ada api
+import { authService } from "@/services/authService";
 
-// Sesuaikan dengan Enum di Prisma
-export type Role = "kepala_muhafidz" | "muhafidz";
+export type Role = "superadmin" | "muhafidz";
 
 interface User {
-  id: number;
+  id_user: number;
   email: string;
   role: Role;
   nama: string;
@@ -19,66 +18,75 @@ interface AuthContextType {
   isLoading: boolean;
   isDarkMode: boolean;
   toggleDarkMode: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
+  // Gunakan useCallback agar bisa dipanggil di useEffect tanpa re-render loop
+  const refreshUser = useCallback(async () => {
+    const savedData = localStorage.getItem("user");
+    if (!savedData) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await authService.getCurrentUser();
+      // Dokumentasi: API return { success: true, data: { user: {...} } }
+      const userData = response.data.user; 
+      const { token } = JSON.parse(savedData);
+
+      const fullData = { ...userData, token };
+      setUser(fullData as any);
+      localStorage.setItem("user", JSON.stringify(fullData));
+    } catch (error) {
+      console.error("Session invalid:", error);
+      logout();
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // 1. Gabungkan Inisialisasi (Theme & Auth) dalam satu useEffect
   useEffect(() => {
+    // Inisialisasi Theme
     const savedTheme = localStorage.getItem("theme");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    
     if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
       setIsDarkMode(true);
       document.documentElement.classList.add("dark");
     }
-  }, []);
 
-  // Simulasi cek session saat pertama kali load
-  useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) setUser(JSON.parse(savedUser));
-  }, []);
+    // Inisialisasi Auth
+    refreshUser();
+  }, [refreshUser]);
 
   const login = async (values: LoginFormValues) => {
     setIsLoading(true);
-    
-    // Simulasi Delay API
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const response = await authService.login(values);
+      
+      // Sesuai dokumentasi: response.data.user dan response.data.token
+      const userData = {
+        ...response.data.user,
+        token: response.data.token
+      };
 
-    // MOCK LOGIC: Berdasarkan email untuk testing role
-    let mockUser: User;
-    
-    if (values.email === "kepala@test.com") {
-      mockUser = { id: 1, email: values.email, role: "kepala_muhafidz", nama: "Ustadz Admin" };
-    } else {
-      mockUser = { id: 2, email: values.email, role: "muhafidz", nama: "Ustadz Pembimbing" };
+      setUser(userData as any);
+      localStorage.setItem("user", JSON.stringify(userData));
+    } catch (error) {
+      throw error; // Biarkan LoginForm yang menangani pesan errornya
+    } finally {
+      setIsLoading(false);
     }
-
-    setUser(mockUser);
-    localStorage.setItem("user", JSON.stringify(mockUser));
-    setIsLoading(false);
   };
-
-  // ketika Backend siap kita akan menggunakan ini:
-
-// const login = async (values: LoginFormValues) => {
-//   setIsLoading(true);
-//   try {
-//     const data = await authService.login(values);
-//     setUser(data.user);
-//     localStorage.setItem("user", JSON.stringify(data));
-//   } catch (error) {
-//     throw error;
-//   } finally {
-//     setIsLoading(false);
-//   }
-// };
-
+  
   const logout = () => {
     setUser(null);
     localStorage.removeItem("user");
@@ -87,7 +95,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const toggleDarkMode = () => {
     const newDarkMode = !isDarkMode;
     setIsDarkMode(newDarkMode);
-    
     if (newDarkMode) {
       document.documentElement.classList.add("dark");
       localStorage.setItem("theme", "dark");
@@ -104,7 +111,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       logout, 
       isLoading,
       isDarkMode,
-      toggleDarkMode 
+      toggleDarkMode,
+      refreshUser
     }}>
       {children}
     </AuthContext.Provider>

@@ -18,7 +18,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   const location = useLocation();
 
   // Definisi Menu berdasarkan Role (Sesuai Flowchart)
-  const menuItems = user?.role === "kepala_muhafidz" 
+  const menuItems = user?.role === "superadmin" 
     ? [
         { name: "Dashboard", path: "/kepala-muhafidz", icon: faChartPie },
         { name: "Kelola Musyrif", path: "/kepala-muhafidz/musyrif", icon: faUserTie },
