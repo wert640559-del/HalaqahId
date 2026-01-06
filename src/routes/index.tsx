@@ -4,7 +4,7 @@ import KepalaMuhafidzPage from "@/pages/kepala-muhafidz";
 import MuhafidzPage from "@/pages/muhafidz"; 
 import { useAuth } from "@/context/AuthContext";
 import DashboardLayout from "@/layouts/DashboardLayout";
-import AbsensiPage from "@/pages/muhafidz/absensi";
+// import AbsensiPage from "@/pages/muhafidz/absensi";
 
 // Komponen Pembatas (Hanya yang sudah login yang boleh lewat)
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -48,7 +48,7 @@ export const AppRouter = () => {
 
         {/* Semua Route di bawah ini akan otomatis punya Sidebar & Header */}
         <Route path="/kepala-muhafidz/*" element={<KepalaMuhafidzPage />} />
-        <Route path="/muhafidz/" element={<MuhafidzPage />}>
+        <Route path="/muhafidz/*" element={<MuhafidzPage />}>
           {/* <Route path="/muhafidz/absensi" element={<AbsensiPage />} /> */}
         </Route>
       </Route>
