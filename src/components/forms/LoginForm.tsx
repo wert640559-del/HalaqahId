@@ -40,21 +40,24 @@ export function LoginForm() {
     },
   });
 
-  async function onSubmit(values: LoginFormValues) {
-    try {
-      // Menjalankan fungsi login dari AuthContext
-      await login(values);
-      
-      // Redirect manual (opsional, karena biasanya ProtectedRoute akan menangani ini)
-      // Namun untuk UX yang baik, kita arahkan ke root/dashboard
-      navigate("/");
-      
-      console.log("Login sukses, mengalihkan...");
-    } catch (error) {
-      console.error("Login failed:", error);
-      // Anda bisa menambahkan toast error di sini nanti
-    }
+async function onSubmit(values: LoginFormValues) {
+  try {
+    await login(values);
+    navigate("/");
+  } catch (error: any) {
+    // Tangkap pesan error dari backend
+    console.error("Full Error Object:", error);
+    console.log("Status Code:", error.response?.status);
+    console.log("Response Data:", error.response?.data);
+    const message = error.response?.data?.message || "Terjadi kesalahan koneksi";
+    
+    // Set error ke field password agar muncul di FormMessage
+    form.setError("password", { 
+      type: "manual", 
+      message: message 
+    });
   }
+}
 
   return (
     <Form {...form}>

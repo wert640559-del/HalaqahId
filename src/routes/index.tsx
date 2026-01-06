@@ -1,19 +1,42 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation, Outlet } from "react-router-dom";
 import LoginPage from "@/pages/auth/LoginPage";
-import KepalaMuhafidzPage from "@/pages/kepala-muhafidz"; 
+import KepalaMuhafidzDashboard from "@/pages/kepala-muhafidz/Dashboard"; // Ganti dengan path yang benar
 import MuhafidzPage from "@/pages/muhafidz"; 
 import { useAuth } from "@/context/AuthContext";
 import DashboardLayout from "@/layouts/DashboardLayout";
-// import AbsensiPage from "@/pages/muhafidz/absensi";
+import { Spinner } from "@/components/ui/spinner";
+// import { useEffect } from "react";
 
-// Komponen Pembatas (Hanya yang sudah login yang boleh lewat)
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+//Memanggil refreshUser (/me) setiap pindah halaman.
+const ProtectedRoute = ({ allowedRoles }: { allowedRoles?: ("superadmin" | "muhafidz")[] }) => {
   const { user, isLoading } = useAuth();
+  const location = useLocation();
 
-  if (isLoading) return <div className="flex h-screen items-center justify-center">Loading...</div>;
-  if (!user) return <Navigate to="/login" replace />;
+  // useEffect(() => {
+  //   // Selalu validasi token ke backend setiap kali pindah URL
+  //   const checkTokenRealtime = async () => {
+  //     if (localStorage.getItem("user")) {
+  //       await refreshUser();
+  //     }
+  //   };
+  //   checkTokenRealtime();
+  // }, [location.pathname, refreshUser]);
 
-  return <>{children}</>;
+  if (isLoading) {
+    return <Spinner />;
+  }
+
+  // Jika tidak ada user (atau token habis setelah refreshUser gagal), tendang ke login
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Jika role tidak diizinkan, kembalikan ke root (yang nanti akan me-redirect ke dashboard masing-masing)
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/" replace />; 
+  }
+
+  return <Outlet />;
 };
 
 export const AppRouter = () => {
@@ -21,39 +44,45 @@ export const AppRouter = () => {
 
   return (
     <Routes>
+      {/* 🔓 Public Route: Login */}
       <Route 
         path="/login" 
         element={user ? <Navigate to="/" replace /> : <LoginPage />} 
       />
 
-      {/* Gunakan DashboardLayout sebagai Wrapper untuk semua rute internal */}
-      <Route
-        element={
-          <ProtectedRoute>
-            <DashboardLayout />
-          </ProtectedRoute>
-        }
-      >
-        {/* Logic Redirect awal */}
-        <Route
-          path="/"
-          element={
-            user?.role === "kepala_muhafidz" ? (
-              <Navigate to="/kepala-muhafidz" replace />
-            ) : (
-              <Navigate to="/muhafidz" replace />
-            )
-          }
-        />
+      {/* 🔒 Protected Routes: Membutuhkan Login */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<DashboardLayout />}>
+          
+          {/* 1. Entry Point: Redirect berdasarkan role */}
+          <Route
+            path="/"
+            element={
+              user?.role === "superadmin" ? (
+                <Navigate to="/kepala-muhafidz" replace />
+              ) : (
+                <Navigate to="/muhafidz" replace />
+              )
+            }
+          />
 
-        {/* Semua Route di bawah ini akan otomatis punya Sidebar & Header */}
-        <Route path="/kepala-muhafidz/*" element={<KepalaMuhafidzPage />} />
-        <Route path="/muhafidz/*" element={<MuhafidzPage />}>
-          {/* <Route path="/muhafidz/absensi" element={<AbsensiPage />} /> */}
+          {/* 2. Rute Khusus Superadmin (Kepala Muhafidz) */}
+          <Route element={<ProtectedRoute allowedRoles={["superadmin"]} />}>
+            <Route path="/kepala-muhafidz" element={<KepalaMuhafidzDashboard />} />
+            {/* Jika Anda ingin punya sub-routes untuk superadmin */}
+            <Route path="/kepala-muhafidz/*" element={<div>Sub-routes for superadmin</div>} />
+          </Route>
+
+          {/* 3. Rute Khusus Muhafidz */}
+          <Route element={<ProtectedRoute allowedRoles={["muhafidz"]} />}>
+            <Route path="/muhafidz/*" element={<MuhafidzPage />} />
+          </Route>
+
         </Route>
       </Route>
 
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      {/* 404 Fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };
