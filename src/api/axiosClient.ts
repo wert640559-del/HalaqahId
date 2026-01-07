@@ -1,20 +1,43 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+  baseURL: import.meta.env.VITE_API_URL || "https://halaqahid-backend.vercel.app/api/halaqah",
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Interceptor untuk menangani token (opsional untuk sekarang)
+// 1. REQUEST INTERCEPTOR: Mengirim Token di setiap request
 axiosClient.interceptors.request.use((config) => {
-  const user = localStorage.getItem("user");
-  if (user) {
-    const { token } = JSON.parse(user);
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+  const savedData = localStorage.getItem("user");
+  if (savedData) {
+    try {
+      const { token } = JSON.parse(savedData);
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (e) {
+      console.error("Gagal parse data user dari localStorage", e);
+    }
   }
   return config;
 });
+
+// 2. RESPONSE INTERCEPTOR: Menangkap kalau token mati (Anti-Jebol)
+axiosClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Cek apakah error 401 DAN bukan berasal dari endpoint login
+    const isLoginRequest = error.config.url.includes('/login');
+
+    if (error.response?.status === 401 && !isLoginRequest) {
+      localStorage.removeItem("user");
+      // Gunakan window.location hanya jika benar-benar perlu logout paksa
+      window.location.href = "/login";
+    }
+    
+    return Promise.reject(error);
+  }
+);
 
 export default axiosClient;
