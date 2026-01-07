@@ -7,7 +7,6 @@ import DashboardLayout from "@/layouts/DashboardLayout";
 import { Spinner } from "@/components/ui/spinner";
 // import { useEffect } from "react";
 
-//Memanggil refreshUser (/me) setiap pindah halaman.
 const ProtectedRoute = ({ allowedRoles }: { allowedRoles?: ("superadmin" | "muhafidz")[] }) => {
   const { user, isLoading } = useAuth();
   const location = useLocation();

@@ -9,6 +9,7 @@ interface User {
   email: string;
   role: Role;
   nama: string;
+  token?: string;
 }
 
 interface AuthContextType {
@@ -28,62 +29,69 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Gunakan useCallback agar bisa dipanggil di useEffect tanpa re-render loop
+  const initializeTheme = () => {
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const shouldBeDark = savedTheme === "dark" || (!savedTheme && prefersDark);
+    
+    setIsDarkMode(shouldBeDark);
+    if (shouldBeDark) {
+      document.documentElement.classList.add("dark");
+    }
+  };
+
   const refreshUser = useCallback(async () => {
     const savedData = localStorage.getItem("user");
+    
     if (!savedData) {
       setIsLoading(false);
       return;
     }
 
     try {
-      if (user) return;
+      // Parse data dari localStorage untuk cek token
+      const parsedData = JSON.parse(savedData);
+      if (!parsedData.token) {
+        logout();
+        return;
+      }
 
+      // Ambil data user dari endpoint /auth/me
       const response = await authService.getCurrentUser();
-      // Dokumentasi: API return { success: true, data: { user: {...} } }
-      const userData = response.data.user; 
-      const { token } = JSON.parse(savedData);
+      const userData = response.data.user;
+      
+      // Gabungkan dengan token dari localStorage
+      const fullUser: User = {
+        ...userData,
+        token: parsedData.token,
+        nama: userData.nama || "User"
+      };
 
-      const fullData = { ...userData, token };
-      setUser(fullData as any);
-      localStorage.setItem("user", JSON.stringify(fullData));
+      setUser(fullUser);
+      localStorage.setItem("user", JSON.stringify(fullUser));
     } catch (error) {
-      console.error("Session invalid:", error);
+      console.error("Failed to refresh user:", error);
       logout();
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
-
-  // 1. Gabungkan Inisialisasi (Theme & Auth) dalam satu useEffect
-  useEffect(() => {
-    // Inisialisasi Theme
-    const savedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
-      setIsDarkMode(true);
-      document.documentElement.classList.add("dark");
-    }
-
-    // Inisialisasi Auth
-    refreshUser();
-  }, [refreshUser]);
+  }, []); // Hapus dependency [user] agar tidak looping
 
   const login = async (values: LoginFormValues) => {
     setIsLoading(true);
     try {
       const response = await authService.login(values);
       
-      // Sesuai dokumentasi: response.data.user dan response.data.token
-      const userData = {
+      const userData: User = {
         ...response.data.user,
-        token: response.data.token
+        token: response.data.token,
+        nama: response.data.user.nama || "User"
       };
 
-      setUser(userData as any);
+      setUser(userData);
       localStorage.setItem("user", JSON.stringify(userData));
     } catch (error) {
-      throw error; // Biarkan LoginForm yang menangani pesan errornya
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -91,6 +99,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   
   const logout = () => {
     setUser(null);
+    setIsLoading(false);
     localStorage.removeItem("user");
   };
 
@@ -105,6 +114,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       localStorage.setItem("theme", "light");
     }
   };
+
+  // Initialize theme dan auth secara terpisah
+  useEffect(() => {
+    initializeTheme();
+    refreshUser();
+  }, [refreshUser]);
 
   return (
     <AuthContext.Provider value={{ 
