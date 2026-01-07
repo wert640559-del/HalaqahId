@@ -27,10 +27,15 @@ axiosClient.interceptors.request.use((config) => {
 axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Cek apakah error 401 DAN bukan berasal dari endpoint login
+    const isLoginRequest = error.config.url.includes('/login');
+
+    if (error.response?.status === 401 && !isLoginRequest) {
       localStorage.removeItem("user");
+      // Gunakan window.location hanya jika benar-benar perlu logout paksa
       window.location.href = "/login";
     }
+    
     return Promise.reject(error);
   }
 );
