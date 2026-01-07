@@ -5,10 +5,11 @@ import MuhafidzPage from "@/pages/muhafidz";
 import { useAuth } from "@/context/AuthContext";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { Spinner } from "@/components/ui/spinner";
+import KelolaMuhafizPage from "@/pages/kepala-muhafidz/KelolaMuhafiz";
+
 // import { useEffect } from "react";
 
-//Memanggil refreshUser (/me) setiap pindah halaman.
-const ProtectedRoute = ({ allowedRoles }: { allowedRoles?: ("superadmin" | "muhafidz")[] }) => {
+const ProtectedRoute = ({ allowedRoles }: { allowedRoles?: ("superadmin" | "muhafiz")[] }) => {
   const { user, isLoading } = useAuth();
   const location = useLocation();
 
@@ -69,12 +70,13 @@ export const AppRouter = () => {
           {/* 2. Rute Khusus Superadmin (Kepala Muhafidz) */}
           <Route element={<ProtectedRoute allowedRoles={["superadmin"]} />}>
             <Route path="/kepala-muhafidz" element={<KepalaMuhafidzDashboard />} />
+            <Route path="/kepala-muhafidz/musyrif" element={<KelolaMuhafizPage />} />
             {/* Jika Anda ingin punya sub-routes untuk superadmin */}
             <Route path="/kepala-muhafidz/*" element={<div>Sub-routes for superadmin</div>} />
           </Route>
 
           {/* 3. Rute Khusus Muhafidz */}
-          <Route element={<ProtectedRoute allowedRoles={["muhafidz"]} />}>
+          <Route element={<ProtectedRoute allowedRoles={["muhafiz"]} />}>
             <Route path="/muhafidz/*" element={<MuhafidzPage />} />
           </Route>
 
