@@ -33,7 +33,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       ];
 
   return (
-    <aside className="flex h-screen w-64 flex-col border-r border-border bg-surface-light dark:bg-surface-dark transition-colors duration-300">
+    <aside className="flex h-screen w-64 flex-col border-r border-border bg-surface-light/90 dark:bg-surface-dark/90 backdrop-blur-md transition-colors duration-300">
       {/* Logo Section */}
       <div className="flex h-20 items-center justify-between px-6"> 
         <div className="flex items-center gap-3">
