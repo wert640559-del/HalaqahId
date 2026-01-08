@@ -14,7 +14,7 @@ export default function DashboardLayout() {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
-    <div className="flex min-h-screen bg-background dark:bg-background-dark font-display relative">
+    <div className="flex min-h-screen bg-gradient-to-br from-background/50 via-background to-background/50 dark:from-background-dark/50 dark:via-background-dark dark:to-background-dark/50 font-display relative">
       
       {/* Sidebar - Desktop & Mobile */}
       {/* Overlay untuk mobile saat sidebar terbuka */}
@@ -39,8 +39,7 @@ export default function DashboardLayout() {
             lg:static
             flex h-16 items-center justify-between
             border-b border-border
-            bg-surface-light px-4 lg:px-8
-            dark:bg-surface-dark
+            bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md px-4 lg:px-8
           "> 
 
           <div className="flex items-center gap-4">
