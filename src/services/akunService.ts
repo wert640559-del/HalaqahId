@@ -21,16 +21,8 @@ export interface ApiResponse<T> {
 export const akunService = {
   // Mendapatkan daftar semua muhafidz
   getAllMuhafiz: async (): Promise<ApiResponse<Muhafiz[]>> => {
-    // Note: Backend belum punya endpoint khusus get all muhafiz
-    // Untuk sekarang, kita akan buat dummy dulu
-    return {
-      success: true,
-      message: "Dummy data",
-      data: [
-        { id_user: 1, email: "muhafiz1@example.com", role: "muhafiz", nama: "Ust. Ahmad" },
-        { id_user: 2, email: "muhafiz2@example.com", role: "muhafiz", nama: "Ust. Budi" },
-      ]
-    };
+    const response = await axiosClient.get<ApiResponse<Muhafiz[]>>("/muhafiz");
+    return response.data;
   },
 
   // Mendaftarkan muhafiz baru
