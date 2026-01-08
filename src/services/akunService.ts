@@ -14,6 +14,11 @@ export interface RegisterData {
   password: string;
 }
 
+export interface UpdateData {
+  username?: string;
+  email?: string;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -33,15 +38,15 @@ export const akunService = {
     return response.data;
   },
 
-  // Reset password (jika nanti ada endpoint-nya)
-  resetPassword: async (_userId: number, _newPassword: string): Promise<ApiResponse<null>> => {
-    // Endpoint belum tersedia di dokumentasi
-    throw new Error("Endpoint reset password belum tersedia");
+  // Edit data muhafiz
+  updateMuhafiz: async (userId: number, data: UpdateData): Promise<ApiResponse<Muhafiz>> => {
+    const response = await axiosClient.patch<ApiResponse<Muhafiz>>(`/auth/muhafiz/${userId}`, data);
+    return response.data;
   },
 
-  // Hapus akun (jika nanti ada endpoint-nya)
-  deleteMuhafiz: async (_userId: number): Promise<ApiResponse<null>> => {
-    // Endpoint belum tersedia di dokumentasi
-    throw new Error("Endpoint delete belum tersedia");
+  // Hapus akun muhafiz (soft delete)
+  deleteMuhafiz: async (userId: number): Promise<ApiResponse<null>> => {
+    const response = await axiosClient.delete<ApiResponse<null>>(`/auth/muhafiz/${userId}`);
+    return response.data;
   }
 };

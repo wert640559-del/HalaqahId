@@ -1673,7 +1673,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   const menuItems = user?.role === "superadmin" 
     ? [
         { name: "Dashboard", path: "/kepala-muhafidz", icon: faChartPie },
-        { name: "Kelola Muhafiz", path: "/kepala-muhafidz/musyrif", icon: faUserTie },
+        { name: "Kelola Muhafiz", path: "/kepala-muhafidz/muhafiz", icon: faUserTie },
         { name: "Kelola Halaqah", path: "/kepala-muhafidz/halaqah", icon: faBook },
         { name: "Lihat Laporan", path: "/kepala-muhafidz/laporan", icon: faClipboardCheck },
       ]
@@ -1842,43 +1842,6 @@ export default function LoginPage() {
             © 2026 Halaqah Management System. All rights reserved.
           </p>
         </div>
-      </div>
-    </div>
-  );
-}
-
---- FILE: ./pages/kepala-muhafidz/Dashboard.tsx ---
-
-export default function KepalaMuhafidzDashboard() {
-  return (
-    <div className="space-y-6">
-      <header className="text-left">
-        <h2 className="text-2xl font-bold dark:text-white">Dashboard Kepala Muhafidz</h2>
-        <p className="text-text-secondary dark:text-text-secondary-dark text-sm">
-          Selamat datang di dashboard manajemen halaqah
-        </p>
-      </header>
-
-      {/* Widget/Statistik */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="rounded-xl border border-border bg-surface p-6 dark:bg-surface-dark shadow-sm">
-          <h3 className="font-semibold text-lg mb-2 dark:text-white">Total Musyrif</h3>
-          <p className="text-3xl font-bold text-primary">12</p>
-        </div>
-        <div className="rounded-xl border border-border bg-surface p-6 dark:bg-surface-dark shadow-sm">
-          <h3 className="font-semibold text-lg mb-2 dark:text-white">Total Halaqah</h3>
-          <p className="text-3xl font-bold text-primary">8</p>
-        </div>
-        <div className="rounded-xl border border-border bg-surface p-6 dark:bg-surface-dark shadow-sm">
-          <h3 className="font-semibold text-lg mb-2 dark:text-white">Kehadiran Hari Ini</h3>
-          <p className="text-3xl font-bold text-primary">85%</p>
-        </div>
-      </div>
-
-      {/* Tabel atau konten lainnya */}
-      <div className="rounded-xl border border-border bg-surface p-6 dark:bg-surface-dark shadow-sm min-h-[400px]">
-        <h3 className="font-semibold text-lg mb-4 dark:text-white">Aktivitas Terbaru</h3>
-        {/* Konten tabel atau grafik */}
       </div>
     </div>
   );
@@ -2080,8 +2043,8 @@ export default function KelolaMuhafizPage() {
               <thead className="bg-accent/30 dark:bg-background-dark/50 text-muted-foreground font-medium">
                 <tr>
                   <th className="px-6 py-4 text-left">ID</th>
+                  <th className="px-6 py-4 text-left">Username</th>
                   <th className="px-6 py-4 text-left">Email</th>
-                  <th className="px-6 py-4 text-left">Nama</th>
                   <th className="px-6 py-4 text-left">Role</th>
                   <th className="px-6 py-4 text-left">Status</th>
                 </tr>
@@ -2094,14 +2057,14 @@ export default function KelolaMuhafizPage() {
                         #{muhafiz.id_user}
                       </span>
                     </td>
+                    <td className="px-6 py-4 dark:text-text-secondary-dark">
+                      {muhafiz.username || "Belum diisi"}
+                    </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <FontAwesomeIcon icon={faEnvelope} className="text-sm text-text-secondary-light dark:text-text-secondary-dark" />
                         <span className="font-medium dark:text-white">{muhafiz.email}</span>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 dark:text-text-secondary-dark">
-                      {muhafiz.nama || "Belum diisi"}
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-300">
@@ -2154,6 +2117,166 @@ export default function KelolaMuhafizPage() {
   );
 }
 
+--- FILE: ./pages/kepala-muhafidz/Dashboard.tsx ---
+
+import { useState, useEffect } from 'react';
+import { akunService } from '@/services/akunService'; // Sesuaikan path
+
+export default function KepalaMuhafidzDashboard() {
+  const [muhafizData, setMuhafizData] = useState<any[]>([]);
+  const [totalMuhafiz, setTotalMuhafiz] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch data dari API
+  useEffect(() => {
+    const fetchMuhafizData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await akunService.getAllMuhafiz();
+        
+        if (response.success && response.data) {
+          setMuhafizData(response.data);
+          setTotalMuhafiz(response.data.length);
+        } else {
+          setError(response.message || 'Gagal mengambil data muhafiz');
+        }
+      } catch (err: any) {
+        console.error('Error fetching muhafiz data:', err);
+        setError(err.message || 'Terjadi kesalahan saat mengambil data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMuhafizData();
+  }, []);
+
+  // Menghitung statistik sederhana
+  const totalHalaqah = muhafizData.length * 2; // Contoh: asumsi setiap muhafiz menangani 2 halaqah
+  const kehadiranHariIni = muhafizData.length > 0 ? '85%' : '0%'; // Data dummy, bisa diganti dengan API jika ada
+
+  return (
+    <div className="space-y-6">
+      <header className="text-left">
+        <h2 className="text-2xl font-bold dark:text-white">Dashboard Kepala Muhafidz</h2>
+        <p className="text-text-secondary dark:text-text-secondary-dark text-sm">
+          Selamat datang di dashboard manajemen halaqah
+        </p>
+      </header>
+
+      {/* Loading State */}
+      {loading && (
+        <div className="rounded-xl border border-border bg-surface p-6 dark:bg-surface-dark shadow-sm">
+          <div className="flex justify-center items-center py-10">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+            <span className="ml-3 dark:text-white">Memuat data...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !loading && (
+        <div className="rounded-xl border border-border bg-surface p-6 dark:bg-surface-dark shadow-sm">
+          <div className="text-center py-6">
+            <div className="text-red-500 mb-2">
+              <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold dark:text-white mb-2">Gagal Memuat Data</h3>
+            <p className="text-text-secondary dark:text-text-secondary-dark">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+            >
+              Coba Lagi
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Widget/Statistik - Tampilkan hanya jika tidak loading dan tidak error */}
+      {!loading && !error && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="rounded-xl border border-border bg-surface p-6 dark:bg-surface-dark shadow-sm">
+              <h3 className="font-semibold text-lg mb-2 dark:text-white">Total Muhafiz</h3>
+              <p className="text-3xl font-bold text-primary">{totalMuhafiz}</p>
+              <p className="text-sm text-text-secondary dark:text-text-secondary-dark mt-2">
+                Total musyrif yang terdaftar
+              </p>
+            </div>
+            <div className="rounded-xl border border-border bg-surface p-6 dark:bg-surface-dark shadow-sm">
+              <h3 className="font-semibold text-lg mb-2 dark:text-white">Total Halaqah</h3>
+              <p className="text-3xl font-bold text-primary">{totalHalaqah}</p>
+              <p className="text-sm text-text-secondary dark:text-text-secondary-dark mt-2">
+                Estimasi jumlah halaqah aktif
+              </p>
+            </div>
+            <div className="rounded-xl border border-border bg-surface p-6 dark:bg-surface-dark shadow-sm">
+              <h3 className="font-semibold text-lg mb-2 dark:text-white">Kehadiran Hari Ini</h3>
+              <p className="text-3xl font-bold text-primary">{kehadiranHariIni}</p>
+              <p className="text-sm text-text-secondary dark:text-text-secondary-dark mt-2">
+                Rata-rata kehadiran musyrif
+              </p>
+            </div>
+          </div>
+
+          {/* Tabel Daftar Muhafiz */}
+          <div className="rounded-xl border border-border bg-surface p-6 dark:bg-surface-dark shadow-sm">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-semibold text-lg dark:text-white">Daftar Muhafiz</h3>
+              <span className="text-sm text-text-secondary dark:text-text-secondary-dark">
+                Total: {totalMuhafiz} orang
+              </span>
+            </div>
+
+            {muhafizData.length === 0 ? (
+              <div className="text-center py-10">
+                <svg className="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="mt-4 dark:text-white">Belum ada data muhafiz</p>
+                <p className="text-sm text-text-secondary dark:text-text-secondary-dark">
+                  Data akan muncul setelah muhafiz terdaftar
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border dark:border-border-dark">
+                      <th className="text-left py-3 px-4 dark:text-white font-medium">No</th>
+                      <th className="text-left py-3 px-4 dark:text-white font-medium">Nama</th>
+                      <th className="text-left py-3 px-4 dark:text-white font-medium">Email</th>
+                      <th className="text-left py-3 px-4 dark:text-white font-medium">ID</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {muhafizData.map((muhafiz, index) => (
+                      <tr key={muhafiz.id_user} className="border-b border-border dark:border-border-dark hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                        <td className="py-3 px-4 dark:text-white">{index + 1}</td>
+                        <td className="py-3 px-4 dark:text-white">
+                          {muhafiz.username || 'Tidak ada nama'}
+                        </td>
+                        <td className="py-3 px-4 dark:text-white">{muhafiz.email}</td>
+                        <td className="py-3 px-4 dark:text-white">{muhafiz.id_user}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 --- FILE: ./pages/kepala-muhafidz/index.tsx ---
 
 // FILE: ./pages/kepala-muhafidz/index.tsx
@@ -2165,7 +2288,7 @@ export default function KepalaMuhafidzPage() {
     <Routes>
       <Route index element={<KepalaMuhafidzDashboard />} />
       {/* Tambahkan sub-routes lain jika diperlukan */}
-      <Route path="musyrif" element={<div>Kelola Musyrif</div>} />
+      <Route path="muhafiz" element={<div>Kelola Muhafiz</div>} />
       <Route path="halaqah" element={<div>Kelola Halaqah</div>} />
       <Route path="laporan" element={<div>Lihat Laporan</div>} />
       <Route path="*" element={<Navigate to="." replace />} />
@@ -2786,26 +2909,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      // Ambil data user dari endpoint /auth/me
-      const response = await authService.getCurrentUser();
-      const userData = response.data.user;
-      
-      // Gabungkan dengan token dari localStorage
-      const fullUser: User = {
-        ...userData,
-        token: parsedData.token,
-        username: userData.username || "User"
-      };
+      // Coba ambil data user dari endpoint /auth/me
+      try {
+        const response = await authService.getCurrentUser();
+        const userData = response.data.user;
+        
+        // Gabungkan dengan token dari localStorage
+        const fullUser: User = {
+          ...userData,
+          token: parsedData.token,
+          username: userData.username || "User"
+        };
 
-      setUser(fullUser);
-      localStorage.setItem("user", JSON.stringify(fullUser));
+        setUser(fullUser);
+        localStorage.setItem("user", JSON.stringify(fullUser));
+      } catch (error) {
+        console.error("Failed to fetch user from API:", error);
+        // Jika gagal fetch user, tetap set user dari localStorage
+        setUser(parsedData);
+      }
     } catch (error) {
-      console.error("Failed to refresh user:", error);
+      console.error("Failed to parse user data:", error);
       logout();
     } finally {
       setIsLoading(false);
     }
-  }, []); // Hapus dependency [user] agar tidak looping
+  }, []);
 
   const login = async (values: LoginFormValues) => {
     setIsLoading(true);
@@ -2845,11 +2974,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Initialize theme dan auth secara terpisah
   useEffect(() => {
     initializeTheme();
     refreshUser();
-  }, [refreshUser]);
+  }, []); 
 
   return (
     <AuthContext.Provider value={{ 
@@ -2884,50 +3012,52 @@ export function cn(...inputs: ClassValue[]) {
 
 --- FILE: ./routes/index.tsx ---
 
-import { Routes, Route, Navigate, useLocation, Outlet } from "react-router-dom";
+// FILE: ./routes/index.tsx
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import LoginPage from "@/pages/auth/LoginPage";
-import KepalaMuhafidzDashboard from "@/pages/kepala-muhafidz/Dashboard"; // Ganti dengan path yang benar
+import KepalaMuhafidzDashboard from "@/pages/kepala-muhafidz/Dashboard";
 import MuhafidzPage from "@/pages/muhafidz"; 
 import { useAuth } from "@/context/AuthContext";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { Spinner } from "@/components/ui/spinner";
 import KelolaMuhafizPage from "@/pages/kepala-muhafidz/KelolaMuhafiz";
 
-// import { useEffect } from "react";
-
 const ProtectedRoute = ({ allowedRoles }: { allowedRoles?: ("superadmin" | "muhafiz")[] }) => {
   const { user, isLoading } = useAuth();
-  const location = useLocation();
-
-  // useEffect(() => {
-  //   // Selalu validasi token ke backend setiap kali pindah URL
-  //   const checkTokenRealtime = async () => {
-  //     if (localStorage.getItem("user")) {
-  //       await refreshUser();
-  //     }
-  //   };
-  //   checkTokenRealtime();
-  // }, [location.pathname, refreshUser]);
 
   if (isLoading) {
-    return <Spinner />;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner className="w-8 h-8" />
+      </div>
+    );
   }
 
-  // Jika tidak ada user (atau token habis setelah refreshUser gagal), tendang ke login
+  // Jika tidak ada user (atau token habis), tendang ke login
   if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/login" replace />;
   }
 
-  // Jika role tidak diizinkan, kembalikan ke root (yang nanti akan me-redirect ke dashboard masing-masing)
+  // Jika role tidak diizinkan, kembalikan ke dashboard sesuai role
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/" replace />; 
+    return user.role === "superadmin" 
+      ? <Navigate to="/kepala-muhafidz" replace />
+      : <Navigate to="/muhafidz" replace />;
   }
 
   return <Outlet />;
 };
 
 export const AppRouter = () => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner className="w-8 h-8" />
+      </div>
+    );
+  }
 
   return (
     <Routes>
@@ -2941,9 +3071,9 @@ export const AppRouter = () => {
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
           
-          {/* 1. Entry Point: Redirect berdasarkan role */}
+          {/* Redirect berdasarkan role */}
           <Route
-            path="/"
+            index
             element={
               user?.role === "superadmin" ? (
                 <Navigate to="/kepala-muhafidz" replace />
@@ -2953,15 +3083,15 @@ export const AppRouter = () => {
             }
           />
 
-          {/* 2. Rute Khusus Superadmin (Kepala Muhafidz) */}
+          {/* Rute Khusus Superadmin (Kepala Muhafidz) */}
           <Route element={<ProtectedRoute allowedRoles={["superadmin"]} />}>
             <Route path="/kepala-muhafidz" element={<KepalaMuhafidzDashboard />} />
-            <Route path="/kepala-muhafidz/musyrif" element={<KelolaMuhafizPage />} />
-            {/* Jika Anda ingin punya sub-routes untuk superadmin */}
+            <Route path="/kepala-muhafidz/muhafiz" element={<KelolaMuhafizPage />} />
+            {/* Tambahkan route superadmin lainnya di sini */}
             <Route path="/kepala-muhafidz/*" element={<div>Sub-routes for superadmin</div>} />
           </Route>
 
-          {/* 3. Rute Khusus Muhafidz */}
+          {/* Rute Khusus Muhafidz */}
           <Route element={<ProtectedRoute allowedRoles={["muhafiz"]} />}>
             <Route path="/muhafidz/*" element={<MuhafidzPage />} />
           </Route>
@@ -3007,7 +3137,6 @@ export const registerSchema = z.object({
 export type LoginFormValues = z.infer<typeof loginSchema>;
 export type SetoranFormValues = z.infer<typeof setoranSchema>;
 export type RegisterFormValues = z.infer<typeof registerSchema>;
-
 
 --- FILE: ./assets/api.md ---
 
@@ -3091,8 +3220,7 @@ Mengubah data Muhafiz (Username/Email) secara spesifik.
 
 ```json
 {
-  "username": "username_baru",
-  "email": "email_baru@mail.com"
+  "username": "username_baru"
 }
 
 ```
@@ -3191,9 +3319,10 @@ const axiosClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  timeout: 10000, 
 });
 
-// 1. REQUEST INTERCEPTOR: Mengirim Token di setiap request
+// REQUEST INTERCEPTOR
 axiosClient.interceptors.request.use((config) => {
   const savedData = localStorage.getItem("user");
   if (savedData) {
@@ -3209,18 +3338,33 @@ axiosClient.interceptors.request.use((config) => {
   return config;
 });
 
-// 2. RESPONSE INTERCEPTOR: Menangkap kalau token mati (Anti-Jebol)
+// RESPONSE INTERCEPTOR
 axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Cek apakah error 401 DAN bukan berasal dari endpoint login
-    const isLoginRequest = error.config.url.includes('/login');
-
-    if (error.response?.status === 401 && !isLoginRequest) {
-      localStorage.removeItem("user");
-      // Gunakan window.location hanya jika benar-benar perlu logout paksa
-      window.location.href = "/login";
+    const originalRequest = error.config;
+    const isLoginRequest = error.config?.url?.includes('/login');
+    
+    // Handle 401 Unauthorized
+    if (error.response?.status === 401 && !isLoginRequest && !originalRequest._retry) {
+      // Tandai request sudah di-retry
+      originalRequest._retry = true;
+      
+      // Coba refresh token jika ada mekanisme refresh token
+      // Untuk sekarang, cukup logout jika 401
+      if (localStorage.getItem("user")) {
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+      }
     }
+    
+    // Log error untuk debugging
+    console.error("API Error:", {
+      status: error.response?.status,
+      data: error.response?.data,
+      url: error.config?.url,
+      method: error.config?.method
+    });
     
     return Promise.reject(error);
   }
@@ -3667,7 +3811,7 @@ export interface ApiResponse<T> {
 export const akunService = {
   // Mendapatkan daftar semua muhafidz
   getAllMuhafiz: async (): Promise<ApiResponse<Muhafiz[]>> => {
-    const response = await axiosClient.get<ApiResponse<Muhafiz[]>>("/muhafiz");
+    const response = await axiosClient.get<ApiResponse<Muhafiz[]>>("auth/muhafiz");
     return response.data;
   },
 
