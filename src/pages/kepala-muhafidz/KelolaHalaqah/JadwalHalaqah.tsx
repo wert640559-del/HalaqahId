@@ -100,10 +100,10 @@ export default function JadwalHalaqah() {
     : mockJadwal;
 
   // Hitung statistik per hari
-  const hariStats = DAYS.reduce((acc, day) => {
-    const count = mockJadwal.filter(j => j.hari === day).length;
-    return { ...acc, [day]: count };
-  }, {} as Record<string, number>);
+//   const hariStats = DAYS.reduce((acc, day) => {
+//     const count = mockJadwal.filter(j => j.hari === day).length;
+//     return { ...acc, [day]: count };
+//   }, {} as Record<string, number>);
 
   return (
     <div className="space-y-6">

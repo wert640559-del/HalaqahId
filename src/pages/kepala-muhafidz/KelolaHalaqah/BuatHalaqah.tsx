@@ -32,7 +32,7 @@ export default function BuatHalaqah({ onSuccess }: BuatHalaqahProps) {
     formState: { errors },
     watch,
     setValue,
-    trigger
+    // trigger
   } = useForm<HalaqahFormData>({
     resolver: zodResolver(halaqahSchema) as any,
     defaultValues: {
