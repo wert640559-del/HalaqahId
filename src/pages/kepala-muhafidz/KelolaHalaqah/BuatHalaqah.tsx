@@ -26,29 +26,28 @@ export default function BuatHalaqah({ onSuccess }: BuatHalaqahProps) {
     { id: 4, nama: "Ust. Dani Setiawan", halaqah_count: 1 },
   ];
 
-    const {
+  const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
     setValue,
     trigger
-    } = useForm<HalaqahFormData>({
-        
-    resolver: zodResolver(halaqahSchema) as any, // ← TAMBAHKAN 'as any'
+  } = useForm<HalaqahFormData>({
+    resolver: zodResolver(halaqahSchema) as any,
     defaultValues: {
-        nama_halaqah: "",
-        kode_halaqah: "HQA-001",
-        deskripsi: "",
-        id_muhafidz: 0,
-        hari: "senin",
-        jam_mulai: "08:00",
-        jam_selesai: "10:00",
-        lokasi: "",
-        kapasitas_maks: 20,
-        status: "aktif"
+      nama_halaqah: "",
+      kode_halaqah: "HQA-001",
+      deskripsi: "",
+      id_muhafidz: 0,
+      hari: "senin",
+      jam_mulai: "08:00",
+      jam_selesai: "10:00",
+      lokasi: "",
+      kapasitas_maks: 20,
+      status: "aktif"
     }
-    });
+  });
 
   // Watch form values untuk validasi real-time
   const jamMulai = watch("jam_mulai");
