@@ -36,7 +36,7 @@ export function DeleteHalaqah({ halaqah, isOpen, onClose, onSuccess }: DeleteHal
     } catch (err: any) {
       const message = err.response?.data?.message || "Gagal menghapus halaqah";
       setError(message);
-      console.error("Delete error:", err);
+      console.error("Delete halaqah error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -60,13 +60,14 @@ export function DeleteHalaqah({ halaqah, isOpen, onClose, onSuccess }: DeleteHal
             <div className="space-y-3">
               <p>Apakah Anda yakin ingin menghapus halaqah ini?</p>
               <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
-                <p className="font-semibold text-destructive">{halaqah?.nama_halaqah}</p>
-                <p className="text-sm text-destructive/80">Jenis: {halaqah?.jenis}</p>
-                <p className="text-sm text-destructive/80">Muhafidz: {halaqah?.muhafidz.username}</p>
+                <p className="font-semibold text-destructive">{halaqah?.name_halaqah}</p>
+                <p className="text-sm text-destructive/80">
+                  Muhafidz: {halaqah?.muhafiz.username} ({halaqah?.muhafiz.email})
+                </p>
                 <p className="text-xs mt-2">ID: #{halaqah?.id_halaqah}</p>
               </div>
               <p className="text-sm text-destructive">
-                <strong>PERINGATAN:</strong> Hapus halaqah juga akan menghapus semua santri di dalamnya!
+                <strong>PERINGATAN:</strong> Tindakan ini akan menghapus halaqah secara permanen.
               </p>
             </div>
           </DialogDescription>

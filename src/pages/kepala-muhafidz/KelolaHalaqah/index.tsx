@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faBook, 
+  faUserTie,
   faUsers,
   faCheck,
   faXmark
@@ -38,10 +39,15 @@ export default function KelolaHalaqahPage() {
     try {
       const response = await halaqahService.getAllHalaqah();
       if (response.success) {
-        setHalaqahList(response.data);
+        // Hitung jumlah santri jika belum ada di response
+        const halaqahWithCount = response.data.map(h => ({
+          ...h,
+          jumlah_santri: h._count.santri || 0
+        }));
+        setHalaqahList(halaqahWithCount);
       }
     } catch (err: any) {
-      setError("Gagal memuat data halaqah");
+      setError("Gagal memuat data halaqah: " + (err.message || "Server error"));
       console.error("Load halaqah error:", err);
     } finally {
       setIsLoading(false);
@@ -60,7 +66,7 @@ export default function KelolaHalaqahPage() {
   };
 
   const handleEditSuccess = () => {
-    setSuccess("Halaqah berhasil diperbarui!");
+    setSuccess("Data halaqah berhasil diperbarui!");
     loadHalaqah();
     setTimeout(() => setSuccess(""), 3000);
   };
@@ -90,9 +96,7 @@ export default function KelolaHalaqahPage() {
   }
 
   // Hitung statistik
-  const totalHalaqah = halaqahList.length;
-  const totalMuhafiz = new Set(halaqahList.map(h => h.muhafidz_id)).size;
-  const totalSantri = halaqahList.reduce((sum, h) => sum + (h.jumlah_santri || 0), 0);
+  const totalSantri = halaqahList.reduce((sum, h) => sum + (h._count.santri || 0), 0);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -101,7 +105,7 @@ export default function KelolaHalaqahPage() {
         <div>
           <h2 className="text-2xl font-bold dark:text-white">Kelola Halaqah</h2>
           <p className="text-text-secondary dark:text-text-secondary-dark text-sm">
-            Kelola halaqah di bawah yayasan Anda
+            Kelola semua halaqah di bawah yayasan Anda
           </p>
         </div>
 
@@ -111,7 +115,7 @@ export default function KelolaHalaqahPage() {
 
       {/* Success Alert */}
       {success && (
-        <Alert variant="default" className="bg-green-50 border-green-200 text-green-800">
+        <Alert variant="default" className="bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300">
           <FontAwesomeIcon icon={faCheck} className="mr-2" />
           <AlertDescription>{success}</AlertDescription>
         </Alert>
@@ -126,7 +130,7 @@ export default function KelolaHalaqahPage() {
       )}
 
       {/* Stats Card */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="rounded-xl border border-border bg-surface p-6 dark:bg-surface-dark shadow-sm">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -134,19 +138,9 @@ export default function KelolaHalaqahPage() {
             </div>
             <div>
               <p className="text-sm text-text-secondary dark:text-text-secondary-dark">Total Halaqah</p>
-              <p className="text-2xl font-bold dark:text-white">{totalHalaqah}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-border bg-surface p-6 dark:bg-surface-dark shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
-              <FontAwesomeIcon icon={faUsers} className="text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <p className="text-sm text-text-secondary dark:text-text-secondary-dark">Total Muhafidz</p>
-              <p className="text-2xl font-bold dark:text-white">{totalMuhafiz}</p>
+              <p className="text-2xl font-bold dark:text-white">
+                {isLoading ? "--" : halaqahList.length}
+              </p>
             </div>
           </div>
         </div>
@@ -158,7 +152,23 @@ export default function KelolaHalaqahPage() {
             </div>
             <div>
               <p className="text-sm text-text-secondary dark:text-text-secondary-dark">Total Santri</p>
-              <p className="text-2xl font-bold dark:text-white">{totalSantri}</p>
+              <p className="text-2xl font-bold dark:text-white">
+                {isLoading ? "--" : totalSantri}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-border bg-surface p-6 dark:bg-surface-dark shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
+              <FontAwesomeIcon icon={faUserTie} className="text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <p className="text-sm text-text-secondary dark:text-text-secondary-dark">Muhafidz Terisi</p>
+              <p className="text-2xl font-bold dark:text-white">
+                {isLoading ? "--" : new Set(halaqahList.map(h => h.muhafiz_id)).size}
+              </p>
             </div>
           </div>
         </div>
@@ -169,7 +179,7 @@ export default function KelolaHalaqahPage() {
         <div className="p-6 border-b border-border dark:border-border-dark">
           <h3 className="font-semibold text-lg dark:text-white">Daftar Halaqah</h3>
           <p className="text-sm text-text-secondary dark:text-text-secondary-dark">
-            Semua halaqah yang terdaftar
+            Semua halaqah yang terdaftar di sistem
           </p>
         </div>
 
@@ -210,23 +220,19 @@ export default function KelolaHalaqahPage() {
             <ul className="text-sm text-text-secondary dark:text-text-secondary-dark space-y-2">
               <li className="flex items-start gap-2">
                 <span className="text-primary">•</span>
-                <span><strong>Bacaan:</strong> Fokus pada pembelajaran membaca Al-Quran</span>
+                <span>Setiap halaqah hanya bisa memiliki satu muhafidz</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-primary">•</span>
-                <span><strong>Hafalan:</strong> Fokus pada menghafal Al-Quran</span>
+                <span>Halaqah yang dihapus tidak bisa dikembalikan</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-primary">•</span>
-                <span><strong>Khusus:</strong> Program khusus seperti Tahfidz, Tafsir, dll.</span>
+                <span>Pastikan muhafidz belum memiliki halaqah lain sebelum ditugaskan</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-primary">•</span>
-                <span>Setiap muhafidz hanya dapat memimpin 1 halaqah</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary">•</span>
-                <span>Hapus halaqah akan memutus relasi dengan muhafidz dan santri</span>
+                <span>Jenis halaqah tidak bisa diubah setelah dibuat</span>
               </li>
             </ul>
           </div>

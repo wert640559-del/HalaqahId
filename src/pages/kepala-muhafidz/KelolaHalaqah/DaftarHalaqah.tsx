@@ -5,9 +5,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faBook, 
   faUserTie,
-  faUsers,
   faEdit,
   faTrash,
+  faUsers,
   faPlus
 } from "@fortawesome/free-solid-svg-icons";
 import { MoreHorizontalIcon } from "lucide-react";
@@ -33,7 +33,7 @@ export function DaftarHalaqah({
   halaqahList, 
   isLoading, 
   onEditClick, 
-  onDeleteClick, 
+  onDeleteClick,
   onCreateClick
 }: DaftarHalaqahProps) {
   
@@ -60,25 +60,15 @@ export function DaftarHalaqah({
         <FontAwesomeIcon icon={faBook} className="text-5xl text-text-secondary-light dark:text-text-secondary-dark mb-4" />
         <h4 className="font-medium dark:text-white mb-2">Belum ada halaqah</h4>
         <p className="text-text-secondary dark:text-text-secondary-dark mb-4">
-          Mulai dengan membuat halaqah pertama
+          Mulai dengan menambahkan halaqah baru
         </p>
         <Button onClick={onCreateClick}>
           <FontAwesomeIcon icon={faPlus} className="mr-2" />
-          Buat Halaqah Pertama
+          Tambah Halaqah Pertama
         </Button>
       </div>
     );
   }
-
-  // Fungsi untuk menentukan warna berdasarkan jenis halaqah
-  const getJenisColor = (jenis: string) => {
-    switch (jenis) {
-      case "BACAAN": return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300";
-      case "HAFALAN": return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300";
-      case "KHUSUS": return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300";
-      default: return "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300";
-    }
-  };
 
   return (
     <div className="overflow-x-auto">
@@ -89,7 +79,6 @@ export function DaftarHalaqah({
             <th className="px-6 py-4 text-left">Nama Halaqah</th>
             <th className="px-6 py-4 text-left">Jenis</th>
             <th className="px-6 py-4 text-left">Muhafidz</th>
-            <th className="px-6 py-4 text-left">Jml. Santri</th>
             <th className="px-6 py-4 text-left">Aksi</th>
           </tr>
         </thead>
@@ -103,28 +92,27 @@ export function DaftarHalaqah({
               </td>
               <td className="px-6 py-4">
                 <div className="flex items-center gap-2">
-                  <FontAwesomeIcon icon={faBook} className="text-sm text-text-secondary-light dark:text-text-secondary-dark" />
-                  <span className="font-medium dark:text-white">{halaqah.nama_halaqah}</span>
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <FontAwesomeIcon icon={faBook} className="text-primary text-sm" />
+                  </div>
+                  <span className="font-medium dark:text-white">{halaqah.name_halaqah}</span>
                 </div>
               </td>
               <td className="px-6 py-4">
-                <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${getJenisColor(halaqah.jenis)}`}>
-                  {halaqah.jenis}
-                </span>
-              </td>
-              <td className="px-6 py-4">
                 <div className="flex items-center gap-2">
-                  <FontAwesomeIcon icon={faUserTie} className="text-sm text-text-secondary-light dark:text-text-secondary-dark" />
+                  <div className="h-6 w-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                    <FontAwesomeIcon icon={faUserTie} className="text-blue-600 dark:text-blue-400 text-xs" />
+                  </div>
                   <div>
-                    <p className="font-medium dark:text-white">{halaqah.muhafidz.username}</p>
-                    <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark">{halaqah.muhafidz.email}</p>
+                    <p className="font-medium dark:text-white">{halaqah.muhafiz.username}</p>
+                    <p className="text-xs text-text-secondary dark:text-text-secondary-dark">{halaqah.muhafiz.email}</p>
                   </div>
                 </div>
               </td>
               <td className="px-6 py-4">
                 <div className="flex items-center gap-2">
                   <FontAwesomeIcon icon={faUsers} className="text-sm text-text-secondary-light dark:text-text-secondary-dark" />
-                  <span className="font-medium dark:text-white">{halaqah.jumlah_santri || 0}</span>
+                  <span className="font-medium dark:text-white">{halaqah._count.santri || 0}</span>
                 </div>
               </td>
               <td className="px-6 py-4">
@@ -134,7 +122,7 @@ export function DaftarHalaqah({
                       <MoreHorizontalIcon className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-40">
+                  <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                     <DropdownMenuGroup>
                       <DropdownMenuItem onClick={() => onEditClick(halaqah)}>

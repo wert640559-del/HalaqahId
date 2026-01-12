@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { halaqahService, type CreateHalaqahData } from "@/services/halaqahService";
+import { halaqahService, type CreateHalaqahData, type UpdateHalaqahData } from "@/services/halaqahService";
+import { akunService } from "@/services/akunService"; // Import service muhafiz
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,12 +28,12 @@ import { toast } from "sonner";
 
 // Import Icons
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBook, faPlus, faCheck, faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
+import { faBook, faPlus, faCheck, faExclamationTriangle, faUserTie } from "@fortawesome/free-solid-svg-icons";
 
+// Sesuai dengan dokumentasi API: hanya name_halaqah dan muhafiz_id
 const halaqahSchema = z.object({
-  nama_halaqah: z.string().min(3, "Nama halaqah minimal 3 karakter"),
-  jenis: z.enum(["BACAAN", "HAFALAN", "KHUSUS"]),
-  muhafidz_id: z.number().min(1, "Pilih muhafidz"),
+  name_halaqah: z.string().min(3, "Nama halaqah minimal 3 karakter"),
+  muhafiz_id: z.number().min(1, "Pilih muhafiz"), // Field yang benar dari API
 });
 
 type HalaqahFormValues = z.infer<typeof halaqahSchema>;
@@ -41,9 +42,8 @@ interface HalaqahFormProps {
   onSuccess?: () => void;
   initialData?: {
     id_halaqah?: number;
-    nama_halaqah?: string;
-    jenis?: "BACAAN" | "HAFALAN" | "KHUSUS";
-    muhafidz_id?: number;
+    name_halaqah?: string;
+    muhafiz_id?: number; // Field yang benar dari API
   };
 }
 
@@ -51,47 +51,79 @@ export function HalaqahForm({ onSuccess, initialData }: HalaqahFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMuhafiz, setLoadingMuhafiz] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const [availableMuhafiz, setAvailableMuhafiz] = useState<Array<{ id_user: number; username: string; email: string }>>([]);
+  const [allMuhafiz, setAllMuhafiz] = useState<Array<{ id_user: number; username: string; email: string }>>([]);
+  const [halaqahList, setHalaqahList] = useState<any[]>([]);
 
   const form = useForm<HalaqahFormValues>({
     resolver: zodResolver(halaqahSchema),
     defaultValues: {
-      nama_halaqah: initialData?.nama_halaqah || "",
-      jenis: initialData?.jenis || "HAFALAN",
-      muhafidz_id: initialData?.muhafidz_id || 0,
+      name_halaqah: initialData?.name_halaqah || "",
+      muhafiz_id: initialData?.muhafiz_id || 0, // Field yang benar
     },
   });
 
   useEffect(() => {
-    loadAvailableMuhafiz();
+    loadMuhafizAndHalaqah();
   }, []);
 
-  const loadAvailableMuhafiz = async () => {
+  const loadMuhafizAndHalaqah = async () => {
     setLoadingMuhafiz(true);
     try {
-      const response = await halaqahService.getAvailableMuhafiz();
-      setAvailableMuhafiz(response.data);
+      // 1. Ambil semua muhafiz
+      const muhafizResponse = await akunService.getAllMuhafiz();
+      const muhafizList = muhafizResponse.data.map(m => ({
+        id_user: m.id_user,
+        username: m.username,
+        email: m.email
+      }));
+      setAllMuhafiz(muhafizList);
+
+      // 2. Ambil semua halaqah untuk mengecek yang sudah punya halaqah
+      const halaqahResponse = await halaqahService.getAllHalaqah();
+      setHalaqahList(halaqahResponse.data);
     } catch (error) {
-      console.error("Error loading muhafiz:", error);
-      toast.error("Gagal memuat daftar muhafidz");
+      console.error("Error loading data:", error);
+      toast.error("Gagal memuat data");
     } finally {
       setLoadingMuhafiz(false);
     }
   };
+
+  // Filter muhafiz yang belum memiliki halaqah
+  const getAvailableMuhafiz = () => {
+    const muhafizWithHalaqah = new Set(halaqahList.map(h => h.muhafiz_id));
+    
+    // Jika sedang edit, tambahkan muhafiz yang sedang mengampu halaqah ini
+    if (initialData?.muhafiz_id) {
+      return allMuhafiz.filter(m => 
+        !muhafizWithHalaqah.has(m.id_user) || m.id_user === initialData.muhafiz_id
+      );
+    }
+    
+    return allMuhafiz.filter(m => !muhafizWithHalaqah.has(m.id_user));
+  };
+
+  const availableMuhafiz = getAvailableMuhafiz();
 
   async function onSubmit(values: HalaqahFormValues) {
     setIsLoading(true);
     setErrorMessage("");
 
     try {
+      // Data yang sesuai dengan dokumentasi API
       const data: CreateHalaqahData = {
-        nama_halaqah: values.nama_halaqah,
-        jenis: values.jenis,
-        muhafidz_id: values.muhafidz_id,
+        name_halaqah: values.name_halaqah,
+        muhafiz_id: values.muhafiz_id,
+        // Tidak ada field 'jenis' dalam dokumentasi API
       };
 
       if (initialData?.id_halaqah) {
-        await halaqahService.updateHalaqah(initialData.id_halaqah, data);
+        // Untuk update, gunakan UpdateHalaqahData
+        const updateData: UpdateHalaqahData = {
+          name_halaqah: values.name_halaqah,
+          muhafiz_id: values.muhafiz_id,
+        };
+        await halaqahService.updateHalaqah(initialData.id_halaqah, updateData);
         toast.success("Halaqah berhasil diperbarui");
       } else {
         await halaqahService.createHalaqah(data);
@@ -99,10 +131,15 @@ export function HalaqahForm({ onSuccess, initialData }: HalaqahFormProps) {
       }
 
       form.reset();
-      if (onSuccess) onSuccess(); // Langsung tutup modal/refresh table
+      if (onSuccess) onSuccess();
     } catch (error: any) {
       const message = error.response?.data?.message || "Terjadi kesalahan saat menyimpan data";
-      setErrorMessage(message); // Alert tetap digunakan untuk error agar user bisa baca detailnya
+      setErrorMessage(message);
+      
+      // Handle error spesifik dari API
+      if (error.response?.data?.message?.includes("muhafiz_id sudah digunakan")) {
+        toast.error("Muhafiz ini sudah memiliki halaqah");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -113,9 +150,9 @@ export function HalaqahForm({ onSuccess, initialData }: HalaqahFormProps) {
       {availableMuhafiz.length === 0 && !loadingMuhafiz && (
         <Alert variant="destructive" className="bg-destructive/5 border-destructive/20 text-destructive">
           <FontAwesomeIcon icon={faExclamationTriangle} className="h-4 w-4" />
-          <AlertTitle>Muhafidz Tidak Tersedia</AlertTitle>
+          <AlertTitle>Muhafiz Tidak Tersedia</AlertTitle>
           <AlertDescription className="text-xs">
-            Semua muhafidz sudah memiliki halaqah. Silahkan buat akun muhafidz baru terlebih dahulu sebelum membuat halaqah.
+            Semua muhafiz sudah memiliki halaqah. Silahkan buat akun muhafiz baru terlebih dahulu sebelum membuat halaqah.
           </AlertDescription>
         </Alert>
       )}
@@ -131,7 +168,7 @@ export function HalaqahForm({ onSuccess, initialData }: HalaqahFormProps) {
           
           <FormField
             control={form.control}
-            name="nama_halaqah"
+            name="name_halaqah"
             render={({ field }) => (
               <FormItem className="space-y-2">
                 <FormLabel>Nama Halaqah</FormLabel>
@@ -153,62 +190,59 @@ export function HalaqahForm({ onSuccess, initialData }: HalaqahFormProps) {
             )}
           />
 
+          {/* Hapus field 'jenis' karena tidak ada dalam dokumentasi API */}
+          
           <FormField
             control={form.control}
-            name="jenis"
+            name="muhafiz_id"
             render={({ field }) => (
               <FormItem className="space-y-2">
-                <FormLabel>Jenis Halaqah</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="h-11">
-                      <SelectValue placeholder="Pilih jenis" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="BACAAN">Bacaan</SelectItem>
-                    <SelectItem value="HAFALAN">Hafalan</SelectItem>
-                    <SelectItem value="KHUSUS">Khusus</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="muhafidz_id"
-            render={({ field }) => (
-              <FormItem className="space-y-2">
-                <FormLabel>Muhafidz</FormLabel>
+                <FormLabel>Muhafiz</FormLabel>
                 <Select 
                   onValueChange={(value) => field.onChange(parseInt(value))} 
                   defaultValue={field.value ? field.value.toString() : undefined}
+                  disabled={loadingMuhafiz || availableMuhafiz.length === 0}
                 >
                   <FormControl>
-                    <SelectTrigger className="h-11" disabled={loadingMuhafiz || availableMuhafiz.length === 0}>
+                    <SelectTrigger className="h-11">
                       {loadingMuhafiz ? (
                         <span className="flex items-center gap-2">
                           <Spinner className="h-4 w-4" /> Memuat...
                         </span>
                       ) : (
-                        <SelectValue placeholder="Pilih muhafidz" />
+                        <SelectValue placeholder="Pilih muhafiz" />
                       )}
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {availableMuhafiz.map((muhafiz) => (
                       <SelectItem key={muhafiz.id_user} value={muhafiz.id_user.toString()}>
-                        {muhafiz.username}
+                        <div className="flex items-center gap-2">
+                          <FontAwesomeIcon icon={faUserTie} className="text-sm" />
+                          <div>
+                            <div className="font-medium">{muhafiz.username}</div>
+                            <div className="text-xs text-muted-foreground">{muhafiz.email}</div>
+                          </div>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
+                {availableMuhafiz.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {availableMuhafiz.length} muhafiz tersedia
+                  </p>
+                )}
               </FormItem>
             )}
           />
+
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+            <p className="text-xs text-yellow-800">
+              <strong>Perhatian:</strong> Setiap muhafiz hanya dapat memiliki satu halaqah.
+            </p>
+          </div>
 
           <Button
             type="submit"
