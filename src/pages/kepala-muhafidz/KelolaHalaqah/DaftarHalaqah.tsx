@@ -1,4 +1,4 @@
-import { type Muhafiz } from "@/services/akunService";
+import { type Halaqah } from "@/services/halaqahService";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -22,54 +22,52 @@ import {
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
-  faUserTie, 
-  faEnvelope,
+  faBook, 
   faEdit,
   faTrash,
+  faUsers,
   faPlus,
-  faSignInAlt,
-  faEllipsisH
+  faEllipsisH,
+  faEnvelope
 } from "@fortawesome/free-solid-svg-icons";
 
-interface DaftarAkunProps {
-  muhafizList: Muhafiz[];
+interface DaftarHalaqahProps {
+  halaqahList: Halaqah[];
   isLoading: boolean;
-  onEditClick: (muhafiz: Muhafiz) => void;
-  onDeleteClick: (muhafiz: Muhafiz) => void;
-  onImpersonateClick: (muhafiz: Muhafiz) => void;
+  onEditClick: (halaqah: Halaqah) => void;
+  onDeleteClick: (halaqah: Halaqah) => void;
   onRefresh: () => void;
   onCreateClick: () => void;
 }
 
-export function DaftarAkun({ 
-  muhafizList, 
+export function DaftarHalaqah({ 
+  halaqahList, 
   isLoading, 
   onEditClick, 
-  onDeleteClick, 
-  onImpersonateClick,
+  onDeleteClick,
   onCreateClick
-}: DaftarAkunProps) {
+}: DaftarHalaqahProps) {
   
   if (isLoading) {
     return (
-      <div className="rounded-md border overflow-hidden">
+      <div className="rounded-md border bg-card overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
               <TableHead className="w-[80px]">ID</TableHead>
-              <TableHead>Username</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
+              <TableHead>Nama Halaqah</TableHead>
+              <TableHead>Muhafidz</TableHead>
+              <TableHead>Total Santri</TableHead>
               <TableHead className="text-right">Aksi</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3, 4, 5].map((i) => (
               <TableRow key={i}>
                 <TableCell><Skeleton className="h-5 w-10" /></TableCell>
                 <TableCell><Skeleton className="h-5 w-32" /></TableCell>
                 <TableCell><Skeleton className="h-5 w-40" /></TableCell>
-                <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                 <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto rounded-md" /></TableCell>
               </TableRow>
             ))}
@@ -79,19 +77,19 @@ export function DaftarAkun({
     );
   }
 
-  if (muhafizList.length === 0) {
+  if (halaqahList.length === 0) {
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center rounded-md border border-dashed p-8 text-center animate-in fade-in duration-500">
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-          <FontAwesomeIcon icon={faUserTie} className="h-10 w-10 text-muted-foreground" />
+          <FontAwesomeIcon icon={faBook} className="h-10 w-10 text-muted-foreground" />
         </div>
-        <h3 className="mt-4 text-lg font-semibold">Belum ada muhafidz</h3>
+        <h3 className="mt-4 text-lg font-semibold">Belum ada halaqah</h3>
         <p className="mb-4 mt-2 text-sm text-muted-foreground">
-          Tambahkan akun pengampu halaqah baru ke sistem.
+          Tambahkan unit halaqah baru untuk mulai mengelola santri.
         </p>
         <Button onClick={onCreateClick}>
           <FontAwesomeIcon icon={faPlus} className="mr-2 h-4 w-4" />
-          Tambah Muhafidz Pertama
+          Tambah Halaqah Pertama
         </Button>
       </div>
     );
@@ -103,41 +101,55 @@ export function DaftarAkun({
         <TableHeader>
           <TableRow className="bg-muted/50 hover:bg-muted/50">
             <TableHead className="w-[80px] font-bold">ID</TableHead>
-            <TableHead className="font-bold">Username</TableHead>
-            <TableHead className="font-bold">Email</TableHead>
-            <TableHead className="font-bold">Role</TableHead>
+            <TableHead className="font-bold">Nama Halaqah</TableHead>
+            <TableHead className="font-bold">Muhafidz</TableHead>
+            <TableHead className="font-bold">Total Santri</TableHead>
             <TableHead className="font-bold">Status</TableHead>
             <TableHead className="text-right font-bold">Aksi</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {muhafizList.map((muhafiz) => (
-            <TableRow key={muhafiz.id_user}>
+          {halaqahList.map((halaqah) => (
+            <TableRow key={halaqah.id_halaqah}>
               <TableCell>
-                <Badge variant="outline" className="font-mono">
-                  #{muhafiz.id_user}
+                <Badge variant="outline" className="font-mono font-normal">
+                  #{halaqah.id_halaqah}
                 </Badge>
               </TableCell>
+              
               <TableCell className="font-medium">
-                {muhafiz.username || "—"}
-              </TableCell>
-              <TableCell>
                 <div className="flex items-center gap-2">
-                  <FontAwesomeIcon icon={faEnvelope} className="text-xs text-muted-foreground" />
-                  <span>{muhafiz.email}</span>
+                  <FontAwesomeIcon icon={faBook} className="text-primary h-3 w-3" />
+                  {halaqah.name_halaqah}
                 </div>
               </TableCell>
+              
               <TableCell>
-                <Badge variant="secondary" className="capitalize font-normal">
-                  {muhafiz.role.toLowerCase()}
-                </Badge>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium">{halaqah.muhafiz.username}</span>
+                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                    <FontAwesomeIcon icon={faEnvelope} className="h-2.5 w-2.5" />
+                    {halaqah.muhafiz.email}
+                  </div>
+                </div>
               </TableCell>
+              
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="font-normal">
+                    <FontAwesomeIcon icon={faUsers} className="mr-1.5 h-2.5 w-2.5" />
+                    {halaqah._count?.santri || 0} Santri
+                  </Badge>
+                </div>
+              </TableCell>
+
               <TableCell>
                 <div className="flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-green-500" />
                   <span className="text-xs">Aktif</span>
                 </div>
               </TableCell>
+
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -146,24 +158,20 @@ export function DaftarAkun({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuLabel>Kelola Akun</DropdownMenuLabel>
+                    <DropdownMenuLabel>Kelola Halaqah</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                      <DropdownMenuItem onClick={() => onImpersonateClick(muhafiz)}>
-                        <FontAwesomeIcon icon={faSignInAlt} className="mr-2 h-3 w-3" />
-                        <span>Login Sebagai</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onEditClick(muhafiz)}>
-                        <FontAwesomeIcon icon={faEdit} className="mr-2 h-3 w-3" />
-                        <span>Edit Profil</span>
+                      <DropdownMenuItem onClick={() => onEditClick(halaqah)}>
+                        <FontAwesomeIcon icon={faEdit} className="mr-2 h-3.5 w-3.5" />
+                        <span>Edit Data</span>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem 
-                        onClick={() => onDeleteClick(muhafiz)}
+                        onClick={() => onDeleteClick(halaqah)}
                         className="text-destructive focus:text-destructive focus:bg-destructive/10"
                       >
-                        <FontAwesomeIcon icon={faTrash} className="mr-2 h-3 w-3" />
-                        <span>Hapus Akun</span>
+                        <FontAwesomeIcon icon={faTrash} className="mr-2 h-3.5 w-3.5" />
+                        <span>Hapus Permanen</span>
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
                   </DropdownMenuContent>

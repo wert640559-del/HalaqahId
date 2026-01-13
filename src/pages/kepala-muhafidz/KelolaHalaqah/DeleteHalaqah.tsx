@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { akunService, type Muhafiz } from "@/services/akunService";
+import { halaqahService, type Halaqah } from "@/services/halaqahService";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,14 +17,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
-interface DeleteAkunProps {
-  muhafiz: Muhafiz | null;
+interface DeleteHalaqahProps {
+  halaqah: Halaqah | null;
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export function DeleteAkun({ muhafiz, isOpen, onClose, onSuccess }: DeleteAkunProps) {
+export function DeleteHalaqah({ halaqah, isOpen, onClose, onSuccess }: DeleteHalaqahProps) {
   const [confirmText, setConfirmText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -36,17 +36,17 @@ export function DeleteAkun({ muhafiz, isOpen, onClose, onSuccess }: DeleteAkunPr
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
-    // Mencegah AlertDialog menutup otomatis jika validasi belum terpenuhi
+    // Mencegah AlertDialog menutup otomatis jika validasi gagal
     e.preventDefault();
-    if (!muhafiz || confirmText !== "hapus") return;
+    if (!halaqah || confirmText !== "hapus") return;
 
     setIsLoading(true);
     setError("");
 
     try {
-      const response = await akunService.deleteMuhafiz(muhafiz.id_user);
+      const response = await halaqahService.deleteHalaqah(halaqah.id_halaqah);
       if (response.success) {
-        toast.success("Akun muhafidz berhasil dihapus secara permanen");
+        toast.success("Halaqah berhasil dihapus secara permanen");
         onSuccess();
         handleClose();
       }
@@ -63,21 +63,18 @@ export function DeleteAkun({ muhafiz, isOpen, onClose, onSuccess }: DeleteAkunPr
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2 text-destructive">
             <FontAwesomeIcon icon={faTriangleExclamation} />
-            Konfirmasi Hapus Akun
+            Konfirmasi Hapus
           </AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="text-sm space-y-3 pt-2">
               <p>
-                Tindakan ini akan menghapus akun secara permanen. Pengguna tidak akan bisa lagi mengakses sistem dengan email ini.
+                Tindakan ini akan menghapus halaqah secara permanen. Data santri di dalamnya mungkin akan kehilangan pengampu.
               </p>
               
               <div className="rounded-md border border-destructive/20 bg-destructive/5 p-3">
-                <p className="font-bold text-destructive">{muhafiz?.username}</p>
+                <p className="font-bold text-destructive">{halaqah?.name_halaqah}</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Email: {muhafiz?.email}
-                </p>
-                <p className="text-[10px] font-mono mt-1 opacity-70 italic">
-                  ID Akun: #{muhafiz?.id_user}
+                  Muhafidz: {halaqah?.muhafiz.username}
                 </p>
               </div>
             </div>
@@ -91,11 +88,11 @@ export function DeleteAkun({ muhafiz, isOpen, onClose, onSuccess }: DeleteAkunPr
         )}
 
         <div className="space-y-3 py-2">
-          <Label htmlFor="confirm-delete" className="text-xs">
+          <Label htmlFor="confirm" className="text-xs">
             Ketik <span className="font-bold uppercase tracking-widest text-destructive">hapus</span> untuk melanjutkan
           </Label>
           <Input
-            id="confirm-delete"
+            id="confirm"
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
             placeholder="hapus"
@@ -120,7 +117,7 @@ export function DeleteAkun({ muhafiz, isOpen, onClose, onSuccess }: DeleteAkunPr
             ) : (
               <FontAwesomeIcon icon={faTrash} className="mr-2 h-3 w-3" />
             )}
-            Hapus Akun
+            Hapus Data
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
