@@ -11,10 +11,9 @@ export default function DashboardLayout() {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background font-display">
         <AppSidebar />
         
-        <SidebarInset className="flex flex-col flex-1">
+        <SidebarInset>
           {/* Header */}
           <header className="flex h-16 shrink-0 items-center justify-between border-b px-4 lg:px-6 sticky top-0 bg-background/95 backdrop-blur z-40">
             <div className="flex items-center gap-4">
@@ -44,7 +43,6 @@ export default function DashboardLayout() {
             </div>
           </main>
         </SidebarInset>
-      </div>
     </SidebarProvider>
   );
 }
