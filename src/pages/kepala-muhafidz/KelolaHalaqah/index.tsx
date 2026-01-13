@@ -5,22 +5,23 @@ import { BuatHalaqah } from "./BuatHalaqah";
 import { DaftarHalaqah } from "./DaftarHalaqah";
 import { EditHalaqah } from "./EditHalaqah";
 import { DeleteHalaqah } from "./DeleteHalaqah";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faBook, 
-  faUserTie,
-  faUsers,
-  faCheck,
-  faXmark
+  // faUserTie,
+  // faUsers,
+  faInfoCircle
 } from "@fortawesome/free-solid-svg-icons";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 export default function KelolaHalaqahPage() {
   const { user } = useAuth();
   const [halaqahList, setHalaqahList] = useState<Halaqah[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [_error, setError] = useState("");
+  const [_success, setSuccess] = useState("");
   
   // State untuk edit dan delete
   const [editingHalaqah, setEditingHalaqah] = useState<Halaqah | null>(null);
@@ -96,104 +97,77 @@ export default function KelolaHalaqahPage() {
   }
 
   // Hitung statistik
-  const totalSantri = halaqahList.reduce((sum, h) => sum + (h._count.santri || 0), 0);
+  // const totalSantri = halaqahList.reduce((sum, h) => sum + (h._count.santri || 0), 0);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Header */}
+    <div className="space-y-8 animate-in fade-in duration-500">
+      
+      {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold dark:text-white">Kelola Halaqah</h2>
-          <p className="text-text-secondary dark:text-text-secondary-dark text-sm">
-            Kelola semua halaqah di bawah yayasan Anda
+          <h2 className="text-3xl font-bold tracking-tight">Kelola Halaqah</h2>
+          <p className="text-muted-foreground">
+            Manajemen unit halaqah dan penugasan muhafidz
           </p>
         </div>
-
-        {/* Tombol Buat Halaqah */}
         <BuatHalaqah onSuccess={handleCreateSuccess} />
       </div>
 
-      {/* Success Alert */}
-      {success && (
-        <Alert variant="default" className="bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300">
-          <FontAwesomeIcon icon={faCheck} className="mr-2" />
-          <AlertDescription>{success}</AlertDescription>
-        </Alert>
-      )}
+      {/* Stats Grid */}
+      {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[
+          { label: "Total Halaqah", value: halaqahList.length, icon: faBook, color: "text-primary" },
+          { label: "Total Santri", value: totalSantri, icon: faUsers },
+          { label: "Muhafidz Aktif", value: new Set(halaqahList.map(h => h.muhafiz_id)).size, icon: faUserTie },
+        ].map((stat, i) => (
+          <Card key={i}>
+            <CardContent className="flex items-center gap-4 p-6">
+              <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center">
+                <FontAwesomeIcon icon={stat.icon} className={`h-5 w-5 ${stat.color}`} />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                <p className="text-2xl font-bold">{isLoading ? "..." : stat.value}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div> */}
 
-      {/* Error Alert */}
-      {error && (
-        <Alert variant="destructive">
-          <FontAwesomeIcon icon={faXmark} className="mr-2" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+      {/* Main Table Card */}
+      <Card className="shadow-sm">
+        <CardHeader className="px-6 py-4">
+          <CardTitle>Daftar Halaqah</CardTitle>
+          <CardDescription>
+            Menampilkan semua unit halaqah yang aktif dalam sistem
+          </CardDescription>
+        </CardHeader>
+        <Separator />
+        <CardContent className="p-0">
+          <DaftarHalaqah
+            halaqahList={halaqahList}
+            isLoading={isLoading}
+            onEditClick={handleEditClick}
+            onDeleteClick={handleDeleteClick}
+            onRefresh={loadHalaqah}
+            onCreateClick={handleCreateSuccess}
+          />
+        </CardContent>
+      </Card>
 
-      {/* Stats Card */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="rounded-xl border border-border bg-surface p-6 dark:bg-surface-dark shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <FontAwesomeIcon icon={faBook} className="text-primary" />
-            </div>
-            <div>
-              <p className="text-sm text-text-secondary dark:text-text-secondary-dark">Total Halaqah</p>
-              <p className="text-2xl font-bold dark:text-white">
-                {isLoading ? "--" : halaqahList.length}
-              </p>
-            </div>
-          </div>
-        </div>
+      {/* Info & Guidelines */}
+      <Alert className="bg-primary/5 border-primary/20">
+        <FontAwesomeIcon icon={faInfoCircle} className="h-4 w-4 text-primary" />
+        <AlertTitle className="font-bold text-primary">Informasi Sistem</AlertTitle>
+        <AlertDescription className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 mt-2 text-muted-foreground text-xs italic">
+          <p>• Satu muhafidz hanya bisa mengampu satu halaqah aktif.</p>
+          <p>• Penghapusan halaqah bersifat permanen (Irreversible).</p>
+          <p>• Perubahan muhafidz akan memperbarui riwayat santri terkait.</p>
+          <p>• Gunakan fitur "Edit" untuk mengubah nama atau pengampu.</p>
+        </AlertDescription>
+      </Alert>
 
-        <div className="rounded-xl border border-border bg-surface p-6 dark:bg-surface-dark shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-              <FontAwesomeIcon icon={faUsers} className="text-green-600 dark:text-green-400" />
-            </div>
-            <div>
-              <p className="text-sm text-text-secondary dark:text-text-secondary-dark">Total Santri</p>
-              <p className="text-2xl font-bold dark:text-white">
-                {isLoading ? "--" : totalSantri}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-border bg-surface p-6 dark:bg-surface-dark shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
-              <FontAwesomeIcon icon={faUserTie} className="text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <p className="text-sm text-text-secondary dark:text-text-secondary-dark">Muhafidz Terisi</p>
-              <p className="text-2xl font-bold dark:text-white">
-                {isLoading ? "--" : new Set(halaqahList.map(h => h.muhafiz_id)).size}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabel Daftar Halaqah */}
-      <div className="rounded-xl border border-border bg-card dark:bg-surface-dark shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-border dark:border-border-dark">
-          <h3 className="font-semibold text-lg dark:text-white">Daftar Halaqah</h3>
-          <p className="text-sm text-text-secondary dark:text-text-secondary-dark">
-            Semua halaqah yang terdaftar di sistem
-          </p>
-        </div>
-
-        <DaftarHalaqah
-          halaqahList={halaqahList}
-          isLoading={isLoading}
-          onEditClick={handleEditClick}
-          onDeleteClick={handleDeleteClick}
-          onRefresh={loadHalaqah}
-          onCreateClick={handleCreateSuccess}
-        />
-      </div>
-
-      {/* Dialog Edit Halaqah */}
+      {/* Modals & Dialogs */}
       <EditHalaqah
         halaqah={editingHalaqah}
         isOpen={isEditOpen}
@@ -201,43 +175,12 @@ export default function KelolaHalaqahPage() {
         onSuccess={handleEditSuccess}
       />
 
-      {/* Dialog Konfirmasi Delete */}
       <DeleteHalaqah
         halaqah={deletingHalaqah}
         isOpen={isDeleteOpen}
         onClose={() => setIsDeleteOpen(false)}
         onSuccess={handleDeleteSuccess}
       />
-
-      {/* Informasi Tambahan */}
-      <div className="rounded-xl border border-border bg-surface p-6 dark:bg-surface-dark shadow-sm">
-        <div className="flex items-start gap-3">
-          <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center flex-shrink-0">
-            <FontAwesomeIcon icon={faBook} className="text-blue-600 dark:text-blue-400" />
-          </div>
-          <div>
-            <h4 className="font-semibold dark:text-white mb-2">Informasi Penting</h4>
-            <ul className="text-sm text-text-secondary dark:text-text-secondary-dark space-y-2">
-              <li className="flex items-start gap-2">
-                <span className="text-primary">•</span>
-                <span>Setiap halaqah hanya bisa memiliki satu muhafidz</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary">•</span>
-                <span>Halaqah yang dihapus tidak bisa dikembalikan</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary">•</span>
-                <span>Pastikan muhafidz belum memiliki halaqah lain sebelum ditugaskan</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary">•</span>
-                <span>Jenis halaqah tidak bisa diubah setelah dibuat</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
