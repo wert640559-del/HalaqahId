@@ -24,22 +24,6 @@ export const useSantri = () => {
     }
   }, []);
 
-  // Load statistik
-  const loadStats = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await santriService.getStats();
-      setStats(data);
-      return data;
-    } catch (err: any) {
-      setError(err.message);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
   // Tambah santri baru
   const createSantri = useCallback(async (data: CreateSantriData) => {
     setIsLoading(true);
@@ -83,24 +67,6 @@ export const useSantri = () => {
       setSantriList(prev => prev.map(s => 
         s.id_santri === id ? { ...s, is_active: false } : s
       ));
-    } catch (err: any) {
-      setError(err.message);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  // Pulihkan santri (admin only)
-  const restoreSantri = useCallback(async (id: number) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const restoredSantri = await santriService.restore(id);
-      setSantriList(prev => prev.map(s => 
-        s.id_santri === id ? restoredSantri : s
-      ));
-      return restoredSantri;
     } catch (err: any) {
       setError(err.message);
       throw err;
