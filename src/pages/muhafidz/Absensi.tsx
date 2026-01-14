@@ -1,4 +1,37 @@
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
+
 type Status = "hadir" | "sakit" | "izin" | "terlambat" | "absen";
 
 interface Halaqah {
@@ -16,9 +49,9 @@ interface Santri {
 interface Absensi {
   santriId: number;
   status: Status;
+  tanggal: Date;
 }
 
-// Tipe data Setoran
 interface Setoran {
   id: number;
   santriId: number;
@@ -37,6 +70,9 @@ export default function AbsensiPage() {
     muhafidz: "Ust. Ahmad",
   });
 
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [isPastDate, setIsPastDate] = useState(false);
+
   const [santri, _setSantri] = useState<Santri[]>([
     { id: 1, nama: "Ahmad", halaqahId: 1 },
     { id: 2, nama: "Burhan", halaqahId: 1 },
@@ -48,18 +84,51 @@ export default function AbsensiPage() {
     { id: 8, nama: "Hamzah", halaqahId: 1 },
   ]);
 
+  // Data absensi dengan tanggal
   const [absensi, setAbsensi] = useState<Absensi[]>([
-    { santriId: 1, status: "hadir" },
-    { santriId: 2, status: "sakit" },
-    { santriId: 3, status: "izin" },
-    { santriId: 4, status: "absen" },
-    { santriId: 5, status: "absen" },
-    { santriId: 6, status: "absen" },
-    { santriId: 7, status: "hadir" },
-    { santriId: 8, status: "sakit" },
+    { 
+      santriId: 1, 
+      status: "izin", 
+      tanggal: new Date(2026, 0, 14) // 14 Januari 2026
+    },
+    { 
+      santriId: 2, 
+      status: "hadir", 
+      tanggal: new Date(2026, 0, 14) 
+    },
+    { 
+      santriId: 3, 
+      status: "izin", 
+      tanggal: new Date(2026, 0, 14) 
+    },
+    { 
+      santriId: 4, 
+      status: "absen", 
+      tanggal: new Date(2026, 0, 14) 
+    },
+    { 
+      santriId: 5, 
+      status: "absen", 
+      tanggal: new Date(2026, 0, 14) 
+    },
+    { 
+      santriId: 6, 
+      status: "absen", 
+      tanggal: new Date(2026, 0, 14) 
+    },
+    { 
+      santriId: 7, 
+      status: "hadir", 
+      tanggal: new Date(2026, 0, 14) 
+    },
+    { 
+      santriId: 8, 
+      status: "sakit", 
+      tanggal: new Date(2026, 0, 14) 
+    },
   ]);
 
-  // Data mock setoran (dari page Setoran)
+  // Data mock setoran
   const [setoran, _setSetoran] = useState<Setoran[]>([
     { 
       id: 1, 
@@ -69,83 +138,95 @@ export default function AbsensiPage() {
       ayat_selesai: 10, 
       nilai: 90, 
       catatan: "Tajwid sudah bagus",
-      tanggal: new Date() 
+      tanggal: new Date(2026, 0, 14)
     },
     { 
       id: 2, 
-      santriId: 3, 
-      surah: "An-Naba", 
-      ayat_mulai: 1, 
-      ayat_selesai: 40, 
-      nilai: 85, 
-      catatan: "Perlu perbaikan makhraj",
-      tanggal: new Date() 
-    },
-    { 
-      id: 3, 
-      santriId: 7, 
-      surah: "Al-Fatihah", 
-      ayat_mulai: 1, 
-      ayat_selesai: 7, 
-      nilai: 95, 
-      catatan: "Sangat lancar",
-      tanggal: new Date() 
-    },
-    { 
-      id: 4, 
-      santriId: 5, 
+      santriId: 1, 
       surah: "Al-Baqarah", 
       ayat_mulai: 11, 
       ayat_selesai: 15, 
-      nilai: 92, 
-      catatan: "Hafalan mantap",
-      tanggal: new Date() 
+      nilai: 85, 
+      catatan: "Perbaikan makhraj",
+      tanggal: new Date(2026, 0, 14)
     },
     { 
-      id: 5, 
+      id: 3, 
       santriId: 2, 
       surah: "Al-Kahf", 
       ayat_mulai: 1, 
       ayat_selesai: 10, 
       nilai: 88, 
       catatan: "Perlu pengulangan",
-      tanggal: new Date() 
+      tanggal: new Date(2026, 0, 14)
+    },
+    { 
+      id: 4, 
+      santriId: 3, 
+      surah: "An-Naba", 
+      ayat_mulai: 1, 
+      ayat_selesai: 40, 
+      nilai: 85, 
+      catatan: "Perlu perbaikan makhraj",
+      tanggal: new Date(2026, 0, 14)
     },
   ]);
 
   const handleStatusChange = (santriId: number, status: Status) => {
     setAbsensi((prev) => {
-      const exists = prev.find((a) => a.santriId === santriId);
+      const exists = prev.find((a) => 
+        a.santriId === santriId && 
+        a.tanggal.toDateString() === selectedDate.toDateString()
+      );
 
       if (exists) {
         return prev.map((a) =>
-          a.santriId === santriId ? { ...a, status } : a
+          a.santriId === santriId && a.tanggal.toDateString() === selectedDate.toDateString() 
+            ? { ...a, status } 
+            : a
         );
       }
 
-      return [...prev, { santriId, status }];
+      return [...prev, { 
+        santriId, 
+        status, 
+        tanggal: new Date(selectedDate) 
+      }];
     });
   };
 
   const handleSubmit = () => {
     console.log("Payload ke backend:", {
-      tanggal: new Date(),
-      absensi,
+      tanggal: selectedDate,
+      absensi: absensi.filter(a => 
+        a.tanggal.toDateString() === selectedDate.toDateString()
+      ),
     });
-
-    alert("Absensi berhasil disimpan");
+    
+    alert(`Absensi untuk tanggal ${format(selectedDate, "dd MMMM yyyy", { locale: id })} berhasil disimpan`);
   };
 
-  // Fungsi untuk mendapatkan setoran hari ini berdasarkan santriId
-  const getTodaySetoran = (santriId: number): Setoran[] => {
-    const today = new Date().toDateString();
+  const handleDateChange = (date: Date | undefined) => {
+    if (date) {
+      setSelectedDate(date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const selected = new Date(date);
+      selected.setHours(0, 0, 0, 0);
+      setIsPastDate(selected < today);
+    }
+  };
+
+  // Ambil setoran berdasarkan tanggal yang dipilih
+  const getSetoranByDate = (santriId: number, date: Date): Setoran[] => {
+    const targetDate = new Date(date).toDateString();
     return setoran.filter(s => 
       s.santriId === santriId && 
-      new Date(s.tanggal).toDateString() === today
+      new Date(s.tanggal).toDateString() === targetDate
     );
   };
 
-  // Fungsi untuk mendapatkan setoran terbaru (dari hari ini atau sebelumnya)
+  // Ambil setoran terbaru
   const getLatestSetoran = (santriId: number): Setoran | undefined => {
     const santriSetoran = setoran
       .filter(s => s.santriId === santriId)
@@ -154,239 +235,377 @@ export default function AbsensiPage() {
     return santriSetoran[0];
   };
 
+  // Data rows berdasarkan tanggal yang dipilih
   const rows = santri.map((s) => {
-    const data = absensi.find((a) => a.santriId === s.id);
-    const todaySetoran = getTodaySetoran(s.id);
+    const data = absensi.find((a) => 
+      a.santriId === s.id && 
+      a.tanggal.toDateString() === selectedDate.toDateString()
+    );
+    
+    const setoranHariIni = getSetoranByDate(s.id, selectedDate);
     const latestSetoran = getLatestSetoran(s.id);
-    const sudahSetorHariIni = todaySetoran.length > 0;
+    const sudahSetorHariIni = setoranHariIni.length > 0;
 
     return {
       santriId: s.id,
       namaSantri: s.nama,
       status: data?.status ?? "absen",
       sudahSetor: sudahSetorHariIni,
-      setoranHariIni: todaySetoran,
+      setoranHariIni: setoranHariIni,
       setoranTerakhir: latestSetoran,
-      totalSetoranHariIni: todaySetoran.length,
+      totalSetoranHariIni: setoranHariIni.length,
     };
   });
 
-  // Summary untuk kehadiran
-  const summaryKehadiran = {
-    total: rows.length,
-    hadir: rows.filter((r) => r.status === "hadir").length,
-    izin: rows.filter((r) => r.status === "izin").length,
-    sakit: rows.filter((r) => r.status === "sakit").length,
-    terlambat: rows.filter((r) => r.status === "terlambat").length,
-    absen: rows.filter((r) => r.status === "absen").length,
+  // Fungsi untuk mendapatkan warna badge berdasarkan status
+  const getStatusBadgeColor = (status: Status): string => {
+    switch (status) {
+      case "hadir": return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800";
+      case "izin": return "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800";
+      case "sakit": return "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800";
+      case "terlambat": return "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800";
+      case "absen": return "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800";
+      default: return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/30 dark:text-gray-300 dark:border-gray-800";
+    }
   };
 
-  // Summary untuk setoran
-  const summarySetoran = {
-    totalSetoran: rows.reduce((acc, row) => acc + row.totalSetoranHariIni, 0),
-    santriSudahSetor: rows.filter(r => r.sudahSetor).length,
+  // Fungsi untuk mendapatkan dot color
+  const getDotColor = (status: Status): string => {
+    switch (status) {
+      case "hadir": return "bg-green-500";
+      case "izin": return "bg-blue-500";
+      case "sakit": return "bg-yellow-500";
+      case "terlambat": return "bg-orange-500";
+      case "absen": return "bg-red-500";
+      default: return "bg-gray-500";
+    }
   };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <header className="flex flex-col text-left">
-        <h2 className="text-2xl font-bold text-foreground dark:text-foreground-dark">
-          Absensi Hari Ini
-        </h2>
-        <p className="text-muted-foreground dark:text-text-secondary-dark text-sm">
-          {new Date().toLocaleDateString("id-ID", {
-            day: "2-digit",
-            month: "long",
-            year: "numeric",
-          })}
-        </p>
-      </header>
-
-      <div className="overflow-hidden rounded-xl border border-border dark:border-border-dark bg-card dark:bg-surface-dark shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-accent/50 dark:bg-background-dark/50 text-foreground dark:text-foreground-dark">
-              <tr>
-                <th className="px-6 py-4 font-semibold">Nama Santri</th>
-                <th className="px-6 py-4 font-semibold">Status</th>
-                <th className="px-6 py-4 font-semibold">Info Setoran</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border dark:divide-border-dark">
-              {rows.map((row) => {
-                const statusColors = {
-                  hadir: "text-green-600 dark:text-green-400",
-                  sakit: "text-yellow-600 dark:text-yellow-400",
-                  izin: "text-blue-600 dark:text-blue-400",
-                  terlambat: "text-orange-600 dark:text-orange-400",
-                  absen: "text-red-600 dark:text-red-400",
-                };
-
-                const statusText = {
-                  hadir: "Hadir",
-                  sakit: "Sakit",
-                  izin: "Izin",
-                  terlambat: "Terlambat",
-                  absen: "Absen",
-                };
-
-                return (
-                  <tr
-                    key={row.santriId}
-                    className="hover:bg-accent/5 transition-colors"
-                  >
-                    <td className="px-6 py-4 font-medium dark:text-foreground-dark">
-                      {row.namaSantri}
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <select
-                        value={row.status}
-                        onChange={(e) =>
-                          handleStatusChange(row.santriId, e.target.value as Status)
-                        }
-                        className={`bg-background dark:bg-background-dark border border-border dark:border-border-dark rounded-md px-3 py-1.5 focus:ring-2 focus:ring-primary outline-none ${statusColors[row.status]}`}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-2xl flex items-center gap-3">
+                Absensi
+                {isPastDate && (
+                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400">
+                    Mengisi untuk tanggal lalu
+                  </Badge>
+                )}
+              </CardTitle>
+              <div className="flex items-center gap-3 mt-1">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-[240px] justify-start text-left font-normal",
+                        !selectedDate && "text-muted-foreground"
+                      )}
+                    >
+                      <svg 
+                        className="mr-2 h-4 w-4" 
+                        fill="none" 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
                       >
-                        <option value="hadir">Hadir</option>
-                        <option value="sakit">Sakit</option>
-                        <option value="izin">Izin</option>
-                        <option value="terlambat">Terlambat</option>
-                        <option value="absen">Absen</option>
-                      </select>
-                      <div className={`text-xs mt-1 ${statusColors[row.status]}`}>
-                        {statusText[row.status]}
-                      </div>
-                    </td>
-
-                    {/* Kolom Info Setoran */}
-                    <td className="px-6 py-4">
-                      {row.sudahSetor ? (
-                        <div className="space-y-2">
-                          {/* Centang untuk yang sudah setor */}
-                          <div className="flex items-center gap-2">
-                            <div className="w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                              <svg 
-                                className="w-3 h-3 text-green-600 dark:text-green-400" 
-                                fill="none" 
-                                stroke="currentColor" 
-                                viewBox="0 0 24 24"
-                              >
-                                <path 
-                                  strokeLinecap="round" 
-                                  strokeLinejoin="round" 
-                                  strokeWidth="3" 
-                                  d="M5 13l4 4L19 7" 
-                                />
-                              </svg>
+                        <path 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          strokeWidth={2} 
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" 
+                        />
+                      </svg>
+                      {selectedDate ? (
+                        format(selectedDate, "EEEE, dd MMMM yyyy", { locale: id })
+                      ) : (
+                        <span>Pilih tanggal</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={handleDateChange}
+                      initialFocus
+                      className="pointer-events-auto"
+                      disabled={(date) => date > new Date()}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <CardDescription>
+                  Pilih tanggal untuk mengisi atau melihat absensi
+                </CardDescription>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              {isPastDate && (
+                <Badge variant="secondary" className="text-xs">
+                  Mode Edit Tanggal Lalu
+                </Badge>
+              )}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {/* Table Absensi */}
+          <div className="rounded-md border overflow-hidden">
+            <Table>
+              <TableHeader className="bg-muted/50">
+                <TableRow>
+                  <TableHead className="w-[50px] font-bold">#</TableHead>
+                  <TableHead className="font-bold">Nama Santri</TableHead>
+                  <TableHead className="font-bold">Status</TableHead>
+                  <TableHead className="font-bold">Info Setoran</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rows.map((row, index) => {
+                  const statusText = row.status.charAt(0).toUpperCase() + row.status.slice(1);
+                  
+                  return (
+                    <TableRow key={row.santriId}>
+                      <TableCell>
+                        <div className="flex items-center justify-center">
+                          <div className={`h-2 w-2 rounded-full ${getDotColor(row.status)}`} />
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {row.namaSantri}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Badge 
+                            variant="outline" 
+                            className={`${getStatusBadgeColor(row.status)} border`}
+                          >
+                            <div className="flex items-center gap-1.5">
+                              <div className={`h-1.5 w-1.5 rounded-full ${getDotColor(row.status)}`} />
+                              {statusText}
                             </div>
-                            <span className="text-sm font-medium text-green-700 dark:text-green-300">
-                              Sudah Setor
-                            </span>
-                          </div>
-
-                          {/* Info detail setoran - HANYA surat dan ayat */}
-                          <div className="space-y-1 ml-7">
-                            {row.setoranHariIni.map((setor) => (
-                              <div key={setor.id} className="text-sm">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium dark:text-foreground-dark">
-                                    {setor.surah}
-                                  </span>
-                                  <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                                    Ayat {setor.ayat_mulai}-{setor.ayat_selesai}
+                          </Badge>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-7 w-7 p-0 hover:bg-muted"
+                              >
+                                <svg 
+                                  className="h-3.5 w-3.5" 
+                                  fill="none" 
+                                  viewBox="0 0 24 24" 
+                                  stroke="currentColor"
+                                >
+                                  <path 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                    strokeWidth={2} 
+                                    d="M19 9l-7 7-7-7" 
+                                  />
+                                </svg>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start" className="w-48">
+                              <DropdownMenuItem onClick={() => handleStatusChange(row.santriId, "hadir")}>
+                                <div className="flex items-center gap-2 w-full">
+                                  <div className="h-2 w-2 rounded-full bg-green-500" />
+                                  <span>Hadir</span>
+                                  {row.status === "hadir" && (
+                                    <svg 
+                                      className="h-3.5 w-3.5 ml-auto text-green-600" 
+                                      fill="none" 
+                                      viewBox="0 0 24 24" 
+                                      stroke="currentColor"
+                                    >
+                                      <path 
+                                        strokeLinecap="round" 
+                                        strokeLinejoin="round" 
+                                        strokeWidth={3} 
+                                        d="M5 13l4 4L19 7" 
+                                      />
+                                    </svg>
+                                  )}
+                                </div>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleStatusChange(row.santriId, "izin")}>
+                                <div className="flex items-center gap-2 w-full">
+                                  <div className="h-2 w-2 rounded-full bg-blue-500" />
+                                  <span>Izin</span>
+                                  {row.status === "izin" && (
+                                    <svg 
+                                      className="h-3.5 w-3.5 ml-auto text-blue-600" 
+                                      fill="none" 
+                                      viewBox="0 0 24 24" 
+                                      stroke="currentColor"
+                                    >
+                                      <path 
+                                        strokeLinecap="round" 
+                                        strokeLinejoin="round" 
+                                        strokeWidth={3} 
+                                        d="M5 13l4 4L19 7" 
+                                      />
+                                    </svg>
+                                  )}
+                                </div>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleStatusChange(row.santriId, "sakit")}>
+                                <div className="flex items-center gap-2 w-full">
+                                  <div className="h-2 w-2 rounded-full bg-yellow-500" />
+                                  <span>Sakit</span>
+                                  {row.status === "sakit" && (
+                                    <svg 
+                                      className="h-3.5 w-3.5 ml-auto text-yellow-600" 
+                                      fill="none" 
+                                      viewBox="0 0 24 24" 
+                                      stroke="currentColor"
+                                    >
+                                      <path 
+                                        strokeLinecap="round" 
+                                        strokeLinejoin="round" 
+                                        strokeWidth={3} 
+                                        d="M5 13l4 4L19 7" 
+                                      />
+                                    </svg>
+                                  )}
+                                </div>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleStatusChange(row.santriId, "terlambat")}>
+                                <div className="flex items-center gap-2 w-full">
+                                  <div className="h-2 w-2 rounded-full bg-orange-500" />
+                                  <span>Terlambat</span>
+                                  {row.status === "terlambat" && (
+                                    <svg 
+                                      className="h-3.5 w-3.5 ml-auto text-orange-600" 
+                                      fill="none" 
+                                      viewBox="0 0 24 24" 
+                                      stroke="currentColor"
+                                    >
+                                      <path 
+                                        strokeLinecap="round" 
+                                        strokeLinejoin="round" 
+                                        strokeWidth={3} 
+                                        d="M5 13l4 4L19 7" 
+                                      />
+                                    </svg>
+                                  )}
+                                </div>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleStatusChange(row.santriId, "absen")}>
+                                <div className="flex items-center gap-2 w-full">
+                                  <div className="h-2 w-2 rounded-full bg-red-500" />
+                                  <span>Absen</span>
+                                  {row.status === "absen" && (
+                                    <svg 
+                                      className="h-3.5 w-3.5 ml-auto text-red-600" 
+                                      fill="none" 
+                                      viewBox="0 0 24 24" 
+                                      stroke="currentColor"
+                                    >
+                                      <path 
+                                        strokeLinecap="round" 
+                                        strokeLinejoin="round" 
+                                        strokeWidth={3} 
+                                        d="M5 13l4 4L19 7" 
+                                      />
+                                    </svg>
+                                  )}
+                                </div>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          {row.sudahSetor ? (
+                            <>
+                              <div className="flex items-center gap-2">
+                                <div className="h-2 w-2 rounded-full bg-green-500" />
+                                <span className="text-sm font-medium">Sudah Setor</span>
+                              </div>
+                              {row.setoranHariIni.map((setor) => (
+                                <div key={setor.id} className="ml-4 text-sm">
+                                  <span className="font-medium">{setor.surah}</span>
+                                  <span className="text-xs text-muted-foreground ml-2">
+                                    (Ayat {setor.ayat_mulai}-{setor.ayat_selesai})
                                   </span>
                                 </div>
-                              </div>
-                            ))}
-                          </div>
+                              ))}
+                            </>
+                          ) : row.setoranTerakhir ? (
+                            <div className="text-sm">
+                              <span className="text-muted-foreground">Terakhir: </span>
+                              <span className="font-medium">{row.setoranTerakhir.surah}</span>
+                              <span className="text-xs text-muted-foreground ml-2">
+                                (Ayat {row.setoranTerakhir.ayat_mulai}-{row.setoranTerakhir.ayat_selesai})
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-sm text-muted-foreground italic">Belum ada setoran</span>
+                          )}
                         </div>
-                      ) : row.setoranTerakhir ? (
-                        // Tampilkan setoran terakhir jika belum setor hari ini
-                        <div className="space-y-1">
-                          <div className="text-sm dark:text-foreground-dark">
-                            <span className="text-muted-foreground">Terakhir: </span>
-                            {row.setoranTerakhir.surah}
-                            <span className="text-xs ml-2">
-                              (Ayat {row.setoranTerakhir.ayat_mulai}-{row.setoranTerakhir.ayat_selesai})
-                            </span>
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="text-muted italic text-xs">Belum ada setoran</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div className="mt-auto sticky bottom-0 bg-card dark:bg-surface-dark rounded-xl border border-border dark:border-border-dark backdrop-blur">
-        <div className="flex items-center justify-between gap-6 px-6 py-5">
-          {/* Container untuk dua baris summary */}
-          <div className="flex-1">
-            {/* Baris 1: Summary Kehadiran */}
-            <div className="flex flex-wrap gap-4 mb-4">
-              {[
-                { label: "Total", value: summaryKehadiran.total, color: "text-foreground dark:text-foreground-dark" },
-                { label: "Hadir", value: summaryKehadiran.hadir, color: "text-green-600 dark:text-green-400" },
-                { label: "Sakit", value: summaryKehadiran.sakit, color: "text-yellow-600 dark:text-yellow-400" },
-                { label: "Izin", value: summaryKehadiran.izin, color: "text-blue-600 dark:text-blue-400" },
-                { label: "Terlambat", value: summaryKehadiran.terlambat, color: "text-orange-600 dark:text-orange-400" },
-                { label: "Absen", value: summaryKehadiran.absen, color: "text-red-600 dark:text-red-400" },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="bg-background/40 dark:bg-background-dark/40 border border-border/40 rounded-2xl px-4 py-3 text-sm shadow-sm min-w-[80px]"
-                >
-                  <p className="text-muted-foreground text-xs">{item.label}</p>
-                  <p className={`font-bold text-lg ${item.color ?? ""}`}>
-                    {item.value}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {/* Baris 2: Summary Setoran */}
-            <div className="flex flex-wrap gap-4">
-              {[
-                { 
-                  label: "Total Setoran", 
-                  value: summarySetoran.totalSetoran, 
-                  color: "text-emerald-600 dark:text-emerald-400" 
-                },
-                { 
-                  label: "Sudah Setor", 
-                  value: summarySetoran.santriSudahSetor, 
-                  color: "text-emerald-600 dark:text-emerald-400" 
-                },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="bg-background/40 dark:bg-background-dark/40 border border-border/40 rounded-2xl px-4 py-3 text-sm shadow-sm min-w-[80px]"
-                >
-                  <p className="text-muted-foreground text-xs">{item.label}</p>
-                  <p className={`font-bold text-lg ${item.color ?? ""}`}>
-                    {item.value}
-                  </p>
-                </div>
-              ))}
-            </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </div>
 
-          {/* Tombol Simpan Absensi di sebelah kanan */}
-          <div className="flex-shrink-0">
-            <button
-              onClick={handleSubmit}
-              className="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-2xl font-semibold shadow-lg shadow-primary/20 transition-all active:scale-95 whitespace-nowrap"
-            >
-              Simpan Absensi
-            </button>
+          {/* Quick Actions */}
+          <div className="flex items-center justify-between mt-6 pt-6 border-t">
+            <div className="text-sm text-muted-foreground">
+              Menampilkan absensi untuk <span className="font-medium text-foreground">
+                {format(selectedDate, "dd MMMM yyyy", { locale: id })}
+              </span>
+              {isPastDate && (
+                <span className="ml-2 text-amber-600 dark:text-amber-400">(Tanggal lalu)</span>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  const confirmed = confirm(`Reset semua status untuk tanggal ${format(selectedDate, "dd MMMM yyyy", { locale: id })}?`);
+                  if (confirmed) {
+                    const updatedAbsensi = absensi.filter(a => 
+                      a.tanggal.toDateString() !== selectedDate.toDateString()
+                    );
+                    
+                    const resetAbsensi = rows.map(row => ({
+                      santriId: row.santriId,
+                      status: "absen" as Status,
+                      tanggal: new Date(selectedDate)
+                    }));
+                    
+                    setAbsensi([...updatedAbsensi, ...resetAbsensi]);
+                  }
+                }}
+              >
+                Reset Absensi
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setSelectedDate(new Date())}
+              >
+                Kembali ke Hari Ini
+              </Button>
+              <Button onClick={handleSubmit} size="sm">
+                <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Simpan Perubahan
+              </Button>
+            </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
