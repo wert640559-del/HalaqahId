@@ -200,7 +200,6 @@ export default function KelolaSantriPage() {
           : currentUser.halaqah_id
       };
 
-      // Simulasi API call
       if (selectedSantri) {
         // Update
         const updated = await mockUpdateSantri(selectedSantri.id_santri, data);
