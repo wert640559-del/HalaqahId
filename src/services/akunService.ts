@@ -8,20 +8,18 @@ export interface Muhafiz {
   nama?: string;
   created_at?: string;
   updated_at?: string;
-  deleted_at?: string; // Untuk soft delete
+  deleted_at?: string; 
 }
 
 export interface RegisterData {
   email: string;
   username: string;
   password: string;
-  // Note: Tidak ada field nama di dokumentasi register
 }
 
 export interface UpdateMuhafizData {
   username?: string;
   email?: string;
-  // Note: Tidak ada field nama di dokumentasi update
 }
 
 export interface ApiResponse<T = any> {
@@ -32,13 +30,13 @@ export interface ApiResponse<T = any> {
 
 export const akunService = {
   getAllMuhafiz: async (): Promise<ApiResponse<Muhafiz[]>> => {
-    const response = await axiosClient.get<ApiResponse<Muhafiz[]>>("/auth/muhafiz");
+    const response = await axiosClient.get<ApiResponse<Muhafiz[]>>("/halaqah/auth/muhafiz");
     return response.data;
   },
 
   getMuhafizById: async (userId: number): Promise<ApiResponse<Muhafiz>> => {
     try {
-      const response = await axiosClient.get<ApiResponse<Muhafiz>>(`/auth/muhafiz/${userId}`);
+      const response = await axiosClient.get<ApiResponse<Muhafiz>>(`/halaqah/auth/muhafiz/${userId}`);
       return response.data;
     } catch (error: any) {
       // Jika endpoint tidak tersedia, bisa fallback ke getAll dan filter
@@ -53,7 +51,7 @@ export const akunService = {
     try {
       // Jika backend punya endpoint search
       const response = await axiosClient.get<ApiResponse<Muhafiz[]>>(
-        `/auth/muhafiz/search?q=${encodeURIComponent(keyword)}`
+        `/halaqah/auth/muhafiz/search?q=${encodeURIComponent(keyword)}`
       );
       return response.data;
     } catch (error: any) {
@@ -76,31 +74,31 @@ export const akunService = {
   },
 
   registerMuhafiz: async (data: RegisterData): Promise<ApiResponse<{ user: Muhafiz }>> => {
-    const response = await axiosClient.post<ApiResponse<{ user: Muhafiz }>>("/auth/register", data);
+    const response = await axiosClient.post<ApiResponse<{ user: Muhafiz }>>("/halaqah/auth/register", data);
     return response.data;
   },
 
   updateMuhafiz: async (userId: number, data: UpdateMuhafizData): Promise<ApiResponse<Muhafiz>> => {
-    const response = await axiosClient.patch<ApiResponse<Muhafiz>>(`/auth/muhafiz/${userId}`, data);
+    const response = await axiosClient.patch<ApiResponse<Muhafiz>>(`/halaqah/auth/muhafiz/${userId}`, data);
     return response.data;
   },
 
     impersonateMuhafiz: async (userId: number): Promise<ApiResponse<{ user: Muhafiz; token: string }>> => {
       const response = await axiosClient.post<ApiResponse<{ user: Muhafiz; token: string }>>(
-        `/auth/impersonate/${userId}`
+        `/halaqah/auth/impersonate/${userId}`
       );
       return response.data;
     },
 
   // Hapus akun muhafiz (soft delete)
   deleteMuhafiz: async (userId: number): Promise<ApiResponse<null>> => {
-    const response = await axiosClient.delete<ApiResponse<null>>(`/auth/muhafiz/${userId}`);
+    const response = await axiosClient.delete<ApiResponse<null>>(`/halaqah/auth/muhafiz/${userId}`);
     return response.data;
   },
 
   bulkDeleteMuhafiz: async (userIds: number[]): Promise<ApiResponse<null>> => {
     try {
-      const response = await axiosClient.post<ApiResponse<null>>("/auth/muhafiz/bulk-delete", {
+      const response = await axiosClient.post<ApiResponse<null>>("/halaqah/auth/muhafiz/bulk-delete", {
         user_ids: userIds
       });
       return response.data;
@@ -130,27 +128,17 @@ export const akunService = {
     }
   },
 
-  // validateUsername: async (username: string): Promise<boolean> => {
-  //   try {
-  //     // Coba daftar dengan username dummy untuk cek ketersediaan
-  //     // Atau tunggu error dari backend saat register/update
-  //     return true; // Default true, validasi akan dilakukan oleh backend
-  //   } catch (error) {
-  //     return false;
-  //   }
-  // },
+  getDeletedMuhafiz: async (): Promise<ApiResponse<Muhafiz[]>> => {
+    const response = await axiosClient.get<ApiResponse<Muhafiz[]>>("/halaqah/auth/muhafiz/deleted");
+    return response.data;
+  },
 
-  // validateEmail: async (email: string): Promise<boolean> => {
-  //   try {
-  //     // Cek melalui search atau tunggu error dari backend
-  //     return true;
-  //   } catch (error) {
-  //     return false;
-  //   }
-  // }
+  restoreMuhafiz: async (userId: number): Promise<ApiResponse<Muhafiz>> => {
+    const response = await axiosClient.patch<ApiResponse<Muhafiz>>(`/halaqah/auth/muhafiz/restore/${userId}`, {});
+    return response.data;
+  },
 };
 
-// Type untuk data update
 export interface UpdateData {
   username?: string;
   email?: string;

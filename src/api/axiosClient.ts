@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://halaqah-id-be.vercel.app/api/halaqah",
+  baseURL: import.meta.env.VITE_API_URL || "https://halaqah-id-be.vercel.app/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -30,6 +30,9 @@ axiosClient.interceptors.request.use((config) => {
 axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    const serverMessage = error.response?.data?.message || "No message from server";
+    console.error("Detail Error dari Backend:", serverMessage);
+
     console.error("API Error:", {
       status: error.response?.status,
       data: error.response?.data,
