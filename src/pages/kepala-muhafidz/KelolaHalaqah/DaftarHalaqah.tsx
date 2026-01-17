@@ -30,19 +30,23 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 interface DaftarHalaqahProps {
   halaqahs: Halaqah[];
-  santriList: any[];
+  santriMap: Record<number, any[]>;
   onEdit: (h: Halaqah) => void;
   onDelete: (h: Halaqah) => void;
-  isLoading?: boolean; // Tambahkan prop loading
+  isLoading?: boolean; 
 }
 
-export function DaftarHalaqah({ halaqahs, santriList, onEdit, onDelete, isLoading }: DaftarHalaqahProps) {
+export function DaftarHalaqah({ halaqahs, onEdit, onDelete, isLoading, santriMap }: DaftarHalaqahProps) {
   
   if (isLoading) return <HalaqahLoadingSkeleton />;
 
   return (
     <Accordion type="single" collapsible className="w-full space-y-3">
-      {halaqahs.map((h) => (
+      {halaqahs.map((h) => {
+      
+      const daftarSantri = santriMap[h.id_halaqah] || [];
+
+      return (
         <AccordionItem 
           key={h.id_halaqah} 
           value={h.id_halaqah.toString()} 
@@ -110,32 +114,31 @@ export function DaftarHalaqah({ halaqahs, santriList, onEdit, onDelete, isLoadin
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {/* Filter santri berdasarkan id_halaqah */}
-                  {santriList.filter(s => s.halaqah_id === h.id_halaqah).length > 0 ? (
-                    santriList.filter(s => s.halaqah_id === h.id_halaqah).map((s) => (
-                      <TableRow key={s.id_santri}>
-                        <TableCell className="font-medium">{s.nama_santri}</TableCell>
-                        <TableCell className="text-muted-foreground">{s.nomor_telepon}</TableCell>
-                        <TableCell className="text-right">
-                          <Badge variant={s.target === "INTENSE" ? "default" : "outline"}>
-                            {s.target}
-                          </Badge>
+                    {daftarSantri.length > 0 ? (
+                      daftarSantri.map((s) => (
+                        <TableRow key={s.id_santri}>
+                          <TableCell>{s.nama_santri}</TableCell>
+                          <TableCell>{s.nomor_telepon}</TableCell>
+                          <TableCell className="text-right">
+                            <Badge variant={s.target === "INTENSE" ? "default" : "outline"}>
+                              {s.target}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={3} className="text-center py-8 italic opacity-50">
+                          Tidak ada santri di kelompok ini.
                         </TableCell>
                       </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={3} className="text-center py-8 text-muted-foreground italic">
-                        Tidak ada santri di kelompok ini.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
+                    )}
+                  </TableBody>
               </Table>
             </div>
           </AccordionContent>
         </AccordionItem>
-      ))}
+      )})}
     </Accordion>
   );
 }

@@ -54,7 +54,6 @@ export default function LaporanSetoranPage() {
     fetchAllSetoran();
   }, [fetchAllSetoran]);
 
-  // Transformasi Data berdasarkan Filter
   const groupedData = useMemo(() => {
     const filterDate = (selectedMonth !== null && selectedYear !== null) 
       ? new Date(selectedYear, selectedMonth) 
@@ -65,46 +64,42 @@ export default function LaporanSetoranPage() {
 
   const halaqahNames = Object.keys(groupedData);
 
-  // Sync Halaqah: Memastikan halaqah yang dipilih tersedia di periode tersebut
   useEffect(() => {
     if (halaqahNames.length > 0) {
       if (!activeHalaqah || !halaqahNames.includes(activeHalaqah)) {
         setActiveHalaqah(halaqahNames[0]);
       }
-    } else {
+    } else if (!loading) {
       setActiveHalaqah("");
     }
-  }, [halaqahNames, activeHalaqah]);
+  }, [halaqahNames, activeHalaqah, loading]);
 
-  // Label Periode untuk Trigger Button
   const periodLabel = (selectedMonth === null || selectedYear === null)
     ? "Semua Periode"
-    : format(new Date(selectedYear, selectedMonth), "MMMM yyyy", { locale: id });
-
-  if (loading) return <LaporanLoadingSkeleton />;
+    : format(new Date(selectedYear ?? 0, selectedMonth ?? 0), "MMMM yyyy", { locale: id });
 
   return (
     <div className="p-6 space-y-6 animate-in fade-in duration-500">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      
+      {/* SECTION 1: HEADER (Statik, tidak loading) */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6">
         <div>
           <LaporanHeader />
-          <p className="text-sm text-muted-foreground">Monitoring progres hafalan santri per halaqah.</p>
+          <p className="text-sm text-muted-foreground mt-1">Monitoring progres hafalan santri per halaqah.</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          {/* Select Halaqah */}
-          {halaqahNames.length > 0 && (
+          {!loading && halaqahNames.length > 0 && (
             <Select value={activeHalaqah} onValueChange={setActiveHalaqah}>
-              <SelectTrigger className="w-full sm:w-[200px] bg-background">
+              <SelectTrigger className="w-full sm:w-[200px] bg-background shadow-sm">
                 <div className="flex items-center gap-2">
-                  <FontAwesomeIcon icon={faUsers} className="h-3.5 w-3.5 opacity-50" />
+                  <FontAwesomeIcon icon={faUsers} className="h-3.5 w-3.5 text-primary/60" />
                   <SelectValue placeholder="Pilih Halaqah" />
                 </div>
               </SelectTrigger>
               <SelectContent>
                 {halaqahNames.map((name) => (
-                  <SelectItem key={name} value={name} className="capitalize font-medium">
+                  <SelectItem key={name} value={name} className="capitalize">
                     {name}
                   </SelectItem>
                 ))}
@@ -112,10 +107,10 @@ export default function LaporanSetoranPage() {
             </Select>
           )}
 
-          {/* Date Picker Popover */}
+          {/* Filter Periode (Bulan/Tahun) */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full sm:w-[220px] justify-start text-left font-normal">
+              <Button variant="outline" className="w-full sm:w-[220px] justify-start text-left font-normal shadow-sm">
                 <FontAwesomeIcon icon={faCalendarAlt} className="mr-2 h-4 w-4 opacity-50" />
                 {periodLabel}
               </Button>
@@ -129,20 +124,18 @@ export default function LaporanSetoranPage() {
                     className="h-auto p-0 text-xs text-primary hover:bg-transparent"
                     onClick={() => { setSelectedMonth(null); setSelectedYear(null); }}
                   >
-                    Reset Semua
+                    Reset Filter
                   </Button>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase text-muted-foreground font-bold">Bulan</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase text-muted-foreground font-bold ml-1">Bulan</label>
                     <Select 
                       value={selectedMonth?.toString() ?? "all"} 
                       onValueChange={(v) => setSelectedMonth(v === "all" ? null : parseInt(v))}
                     >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {MONTHS.map((m) => (
                           <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
@@ -151,15 +144,13 @@ export default function LaporanSetoranPage() {
                     </Select>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase text-muted-foreground font-bold">Tahun</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase text-muted-foreground font-bold ml-1">Tahun</label>
                     <Select 
                       value={selectedYear?.toString() ?? "all"} 
                       onValueChange={(v) => setSelectedYear(v === "all" ? null : parseInt(v))}
                     >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Semua Tahun</SelectItem>
                         {years.map((y) => (
@@ -175,63 +166,60 @@ export default function LaporanSetoranPage() {
         </div>
       </div>
 
-      {/* Content Section */}
-      {halaqahNames.length === 0 ? (
-        <EmptyState isFilterActive={selectedMonth !== null} />
-      ) : (
-        <div className="space-y-6 animate-in slide-in-from-bottom-2 duration-300">
-          {activeHalaqah && groupedData[activeHalaqah] && (
-            <>
-              <div className="flex items-center gap-2 px-1 border-b pb-2">
-                <FontAwesomeIcon icon={faUserGraduate} className="text-primary h-4 w-4" />
-                <h3 className="font-bold text-lg capitalize">
-                  Daftar Progres: <span className="text-primary">{activeHalaqah}</span>
-                </h3>
+      {/* SECTION 2: CONTENT (Bagian yang Loading/Skeleton) */}
+      <div className="min-h-[400px]">
+        {loading ? (
+          <div className="space-y-4 pt-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="border rounded-xl p-5 space-y-3">
+                <div className="flex justify-between items-center">
+                  <div className="flex gap-3 items-center">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <Skeleton className="h-5 w-40" />
+                  </div>
+                  <Skeleton className="h-8 w-24" />
+                </div>
+                <Skeleton className="h-4 w-full" />
               </div>
-              
-              <SantriAccordion santriGroup={groupedData[activeHalaqah].santriGroup} />
-            </>
-          )}
-        </div>
-      )}
+            ))}
+          </div>
+        ) : halaqahNames.length === 0 ? (
+          <EmptyState isFilterActive={selectedMonth !== null} />
+        ) : (
+          <div className="space-y-6 animate-in slide-in-from-bottom-2 duration-500">
+            {activeHalaqah && groupedData[activeHalaqah] && (
+              <>
+                <div className="flex items-center gap-2 px-1">
+                  <FontAwesomeIcon icon={faUserGraduate} className="text-primary h-4 w-4" />
+                  <h3 className="font-bold text-lg capitalize">
+                    Daftar Progres: <span className="text-primary">{activeHalaqah}</span>
+                  </h3>
+                </div>
+                
+                <SantriAccordion santriGroup={groupedData[activeHalaqah].santriGroup} />
+              </>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-// --- Local Helpers ---
+// --- Sub-components ---
 
 function EmptyState({ isFilterActive }: { isFilterActive: boolean }) {
   return (
-    <Card className="border-dashed flex flex-col items-center justify-center p-12 text-center">
+    <Card className="border-dashed flex flex-col items-center justify-center p-16 text-center bg-muted/20">
       <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
         <FontAwesomeIcon icon={faCalendarAlt} className="h-8 w-8 text-muted-foreground/40" />
       </div>
-      <h3 className="text-lg font-semibold">Tidak ada data setoran</h3>
-      <p className="text-sm text-muted-foreground max-w-xs">
+      <h3 className="text-lg font-semibold">Data Tidak Ditemukan</h3>
+      <p className="text-sm text-muted-foreground max-w-xs mt-1">
         {isFilterActive 
-          ? "Tidak ditemukan data untuk periode ini. Silakan pilih bulan lain atau reset filter."
-          : "Database setoran masih kosong."}
+          ? "Tidak ada setoran untuk periode ini. Cobalah ganti bulan atau tahun pada filter."
+          : "Database setoran masih kosong. Hubungi admin atau muhafiz untuk input data."}
       </p>
     </Card>
-  );
-}
-
-function LaporanLoadingSkeleton() {
-  return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-64" />
-        </div>
-        <div className="flex gap-2">
-          <Skeleton className="h-10 w-40" />
-          <Skeleton className="h-10 w-40" />
-        </div>
-      </div>
-      <div className="space-y-4">
-        {[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}
-      </div>
-    </div>
   );
 }

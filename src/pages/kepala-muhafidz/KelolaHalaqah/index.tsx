@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { halaqahService, type Halaqah } from "@/services/halaqahService";
 import { useSantri } from "@/hooks/useSantri";
 import { toast } from "sonner";
@@ -7,14 +7,13 @@ import { BuatHalaqah } from "./BuatHalaqah";
 import { EditHalaqah } from "./EditHalaqah";
 import { DeleteHalaqah } from "./DeleteHalaqah";
 import { DaftarHalaqah } from "./DaftarHalaqah";
-
+import { HalaqahManagement } from "@/components/ui/TypedText";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUsers } from "@fortawesome/free-solid-svg-icons";
-import { HalaqahManagement } from "@/components/ui/TypedText";
 
 export default function KelolaHalaqah() {
   const [halaqahs, setHalaqahs] = useState<Halaqah[]>([]);  
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingHalaqah, setIsLoadingHalaqah] = useState(true);
   const [selectedHalaqah, setSelectedHalaqah] = useState<Halaqah | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -22,17 +21,19 @@ export default function KelolaHalaqah() {
   const { santriList, loadSantri } = useSantri();
 
   const fetchData = useCallback(async () => {
-    setIsLoading(true);
+    // Tahap 1: Ambil data halaqah saja dulu (Ringan)
+    setIsLoadingHalaqah(true);
     try {
-      const activeRes = await halaqahService.getAllHalaqah();
-      await loadSantri(); 
-      
-      setHalaqahs(activeRes.data);
+      const res = await halaqahService.getAllHalaqah();
+      setHalaqahs(res.data);
+      setIsLoadingHalaqah(false); // UI Langsung muncul di sini
+
+      // Tahap 2: Ambil data santri (Berat) di background
+      // Tidak perlu await karena tidak menghalangi render halaqah
+      loadSantri(); 
     } catch (error) {
-      console.error(error);
-      toast.error("Gagal sinkronisasi data dari server");
-    } finally {
-      setIsLoading(false);
+      toast.error("Gagal mengambil data halaqah");
+      setIsLoadingHalaqah(false);
     }
   }, [loadSantri]);
 
@@ -40,41 +41,39 @@ export default function KelolaHalaqah() {
     fetchData();
   }, [fetchData]);
 
-  const handleEdit = (h: Halaqah) => {
-    setSelectedHalaqah(h);
-    setIsEditOpen(true);
-  };
-
-  const handleDelete = (h: Halaqah) => {
-    setSelectedHalaqah(h);
-    setIsDeleteOpen(true);
-  };
+  // OPTIMASI: Kelompokkan santri berdasarkan ID halaqah satu kali saja (O(n))
+  // Ini mencegah fungsi .filter() yang lambat di dalam loop render
+  const santriMap = useMemo(() => {
+    return santriList.reduce((acc, s) => {
+      const key = s.halaqah_id;
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(s);
+      return acc;
+    }, {} as Record<number, any[]>);
+  }, [santriList]);
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6">
         <div>
           <HalaqahManagement/>
-          <p className="text-muted-foreground">Kelola kelompok bimbingan dan pantau santri di dalamnya.</p>
+          <p className="text-muted-foreground">Kelola kelompok bimbingan santri.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <BuatHalaqah onSuccess={fetchData} />
-        </div>
+        <BuatHalaqah onSuccess={fetchData} />
       </div>
 
-      {!isLoading && halaqahs.length === 0 ? (
+      {!isLoadingHalaqah && halaqahs.length === 0 ? (
         <EmptyState message="Belum ada halaqah yang dibuat." />
       ) : (
         <DaftarHalaqah 
           halaqahs={halaqahs} 
-          santriList={santriList} 
-          onEdit={handleEdit} 
-          onDelete={handleDelete}
-          isLoading={isLoading} 
+          santriMap={santriMap}
+          isLoading={isLoadingHalaqah}
+          onEdit={(h) => { setSelectedHalaqah(h); setIsEditOpen(true); }}
+          onDelete={(h) => { setSelectedHalaqah(h); setIsDeleteOpen(true); }}
         />
       )}
 
-      {/* Modals */}
       {selectedHalaqah && (
         <>
           <EditHalaqah 
@@ -97,9 +96,9 @@ export default function KelolaHalaqah() {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed rounded-xl opacity-60">
-      <FontAwesomeIcon icon={faUsers} size="3x" className="mb-4 text-muted-foreground" />
-      <p className="font-medium">{message}</p>
+    <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed rounded-xl opacity-50">
+      <FontAwesomeIcon icon={faUsers} size="3x" className="mb-4" />
+      <p>{message}</p>
     </div>
   );
 }
