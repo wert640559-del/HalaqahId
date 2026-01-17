@@ -25,6 +25,12 @@ export const registerSchema = z.object({
   path: ["confirmPassword"]
 });
 
+export const halaqahSchema = z.object({
+  name_halaqah: z.string().min(3, "Nama halaqah minimal 3 karakter"),
+  muhafiz_id: z.coerce.number().min(1, "Pilih Muhafidz"),
+});
+
 export type LoginFormValues = z.infer<typeof loginSchema>;
 export type SetoranFormValues = z.infer<typeof setoranSchema>;
 export type RegisterFormValues = z.infer<typeof registerSchema>;
+export type HalaqahFormValues = z.infer<typeof halaqahSchema>;
