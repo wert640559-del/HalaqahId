@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { halaqahSchema, type HalaqahFormValues } from "@/utils/zodSchema";
@@ -28,6 +28,7 @@ interface HalaqahFormProps {
 
 export function HalaqahForm({ initialData, onSuccess }: HalaqahFormProps) {
   const [muhafidzs, setMuhafidzs] = useState<Muhafidz[]>([]);
+  const [existingHalaqahs, setExistingHalaqahs] = useState<any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<HalaqahFormValues>({
@@ -40,16 +41,18 @@ export function HalaqahForm({ initialData, onSuccess }: HalaqahFormProps) {
 
   // Ambil daftar muhafidz untuk dropdown
   useEffect(() => {
-    const fetchMuhafidz = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axiosClient.get("/halaqah/auth/muhafiz");
-        // Sesuaikan path response.data jika strukturnya berbeda
-        setMuhafidzs(response.data.data || response.data);
+        const muhafidzRes = await axiosClient.get("/halaqah/auth/muhafiz");
+        setMuhafidzs(muhafidzRes.data.data || muhafidzRes.data);
+        
+        const halaqahRes = await halaqahService.getAllHalaqah();
+        setExistingHalaqahs(halaqahRes.data || []);
       } catch (error) {
-        toast.error("Gagal mengambil daftar Muhafidz");
+        toast.error("Gagal sinkronisasi data");
       }
     };
-    fetchMuhafidz();
+    fetchData();
   }, []);
 
   const onSubmit = async (values: HalaqahFormValues) => {
@@ -70,9 +73,24 @@ export function HalaqahForm({ initialData, onSuccess }: HalaqahFormProps) {
     }
   };
 
+  const availableMuhafidz = useMemo(() => {
+    // Ambil semua ID muhafidz yang sudah mengajar di halaqah manapun
+    const takenIds = existingHalaqahs.map((h) => h.muhafiz_id);
+
+    return muhafidzs.filter((m) => {
+      // Jika mode EDIT, muhafidz saat ini harus tetap muncul
+      if (initialData && m.id_user === initialData.muhafiz_id) {
+        return true;
+      }
+      // Munculkan hanya jika ID nya tidak ada di daftar 'takenIds'
+      return !takenIds.includes(m.id_user);
+    });
+  }, [muhafidzs, existingHalaqahs, initialData]);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Field Name Halaqah tetap sama */}
         <FormField
           control={form.control}
           name="name_halaqah"
@@ -95,7 +113,7 @@ export function HalaqahForm({ initialData, onSuccess }: HalaqahFormProps) {
               <FormLabel>Muhafidz Pengampu</FormLabel>
               <Select 
                 onValueChange={(val) => field.onChange(Number(val))} 
-                defaultValue={field.value ? field.value.toString() : undefined}
+                value={field.value?.toString()} // Gunakan value agar sinkron dengan state
               >
                 <FormControl>
                   <SelectTrigger>
@@ -103,11 +121,17 @@ export function HalaqahForm({ initialData, onSuccess }: HalaqahFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {muhafidzs.map((m) => (
-                    <SelectItem key={m.id_user} value={m.id_user.toString()}>
-                      {m.username}
-                    </SelectItem>
-                  ))}
+                  {availableMuhafidz.length > 0 ? (
+                    availableMuhafidz.map((m) => (
+                      <SelectItem key={m.id_user} value={m.id_user.toString()}>
+                        {m.username}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="p-2 text-xs text-center text-muted-foreground">
+                      Semua muhafidz sudah mengampu kelompok.
+                    </div>
+                  )}
                 </SelectContent>
               </Select>
               <FormMessage />
