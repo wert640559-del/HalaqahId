@@ -4,7 +4,7 @@ export default function Laporan() {
   return (
     <h1 className="text-3xl font-semibold">
       <ReactTyped
-        strings={["Laporan Setoran Hafalan Santri"]}
+        strings={["Laporan Setoran"]}
         typeSpeed={60}
         backSpeed={32}
         backDelay={2800}
