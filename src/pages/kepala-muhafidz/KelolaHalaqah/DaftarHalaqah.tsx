@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUsers, faUserTie } from "@fortawesome/free-solid-svg-icons";
-import { MoreVertical, Edit2, Trash2, ArrowRightLeft } from "lucide-react"; 
+import { MoreVertical, Edit2, Trash2, ArrowRightLeft, UserPlus } from "lucide-react"; 
 import { 
   Accordion, 
   AccordionContent, 
@@ -38,6 +38,7 @@ interface DaftarHalaqahProps {
   onEditSantri: (s: Santri) => void; 
   onDeleteSantri: (s: Santri) => void; 
   isLoading?: boolean; 
+  onAddSantri: (h: Halaqah) => void;
 }
 
 export function DaftarHalaqah({ 
@@ -48,7 +49,8 @@ export function DaftarHalaqah({
   onEditSantri, 
   onDeleteSantri, 
   isLoading, 
-  santriMap 
+  santriMap,
+  onAddSantri
 }: DaftarHalaqahProps) {
   
   if (isLoading) return <HalaqahLoadingSkeleton />;
@@ -104,6 +106,10 @@ export function DaftarHalaqah({
                   <DropdownMenuContent align="end" className="w-[160px]">
                     <DropdownMenuLabel>Aksi Halaqah</DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => onAddSantri(h)} className="cursor-pointer text-primary focus:text-primary">
+                      <UserPlus className="mr-2 h-4 w-4" /> 
+                      <span>Tambah Santri</span>
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onEdit(h)} className="cursor-pointer">
                       <Edit2 className="mr-2 h-4 w-4" />
                       <span>Edit Data</span>
