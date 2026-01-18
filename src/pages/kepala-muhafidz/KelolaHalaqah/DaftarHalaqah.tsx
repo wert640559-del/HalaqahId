@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUsers, faUserTie } from "@fortawesome/free-solid-svg-icons";
+import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { MoreVertical, Edit2, Trash2, ArrowRightLeft, UserPlus } from "lucide-react"; 
 import { 
   Accordion, 
@@ -167,7 +168,7 @@ export function DaftarHalaqah({
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-2 text-primary hover:text-primary-dark hover:underline transition-all"
                             >
-                              <FontAwesomeIcon icon="fa-brands fa-whatsapp" />
+                              <FontAwesomeIcon icon={faWhatsapp} />
                               {s.nomor_telepon}
                             </a>
                           </TableCell>
