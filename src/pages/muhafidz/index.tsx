@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import SetoranPage from "./Setoran";
-import AbsensiPage from "./Absensi"; 
+import AbsensiPage from "./Absensi";
 import KelolaSantriPage from "./KelolaSantri"; 
 import ProgresSantriPage from "./ProgresSantri";
 

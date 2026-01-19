@@ -59,7 +59,7 @@ export function DeleteHalaqah({ halaqah, isOpen, onClose, onSuccess }: DeleteHal
 
   return (
     <AlertDialog open={isOpen} onOpenChange={handleClose}>
-      <AlertDialogContent className="sm:max-w-[425px]">
+      <AlertDialogContent className="sm:max-w-106.25">
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2 text-destructive">
             <FontAwesomeIcon icon={faTriangleExclamation} />
@@ -110,7 +110,7 @@ export function DeleteHalaqah({ halaqah, isOpen, onClose, onSuccess }: DeleteHal
             variant="destructive"
             onClick={handleDelete}
             disabled={confirmText !== "hapus" || isLoading}
-            className="min-w-[100px]"
+            className="min-w-25"
           >
             {isLoading ? (
               <FontAwesomeIcon icon={faCircleNotch} className="animate-spin mr-2" />

@@ -86,7 +86,7 @@ export function SantriAccordion({ santriGroup }: SantriAccordionProps) {
                           {s.taqwim}
                         </span>
                         {s.keterangan && (
-                          <span className="text-[10px] italic text-muted-foreground truncate max-w-[120px]">
+                          <span className="text-[10px] italic text-muted-foreground truncate max-w-30">
                             {s.keterangan}
                           </span>
                         )}
