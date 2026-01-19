@@ -10,6 +10,8 @@ import KelolaMuhafizPage from "@/pages/kepala-muhafidz/KelolaMuhafiz";
 import KelolaHalaqahPage from "@/pages/kepala-muhafidz/KelolaHalaqah";
 import SettingsPage from "@/pages/settings";
 import LaporanSetoranPage from "@/pages/kepala-muhafidz/LaporanSetoran";
+import InfoSection from "@/pages/settings/InfoSection";
+import TrashSection from "@/pages/settings/TrashSection";
 
 const ProtectedRoute = ({ allowedRoles }: { allowedRoles?: ("superadmin" | "muhafiz")[] }) => {
   const { user, isLoading } = useAuth();
@@ -78,6 +80,9 @@ export const AppRouter = () => {
             <Route path="/kepala-muhafidz/muhafiz" element={<KelolaMuhafizPage />} />
             <Route path="/kepala-muhafidz/halaqah" element={<KelolaHalaqahPage />} />
             <Route path="/kepala-muhafidz/settings" element={<SettingsPage/>} />
+            <Route path="/kepala-muhafidz/settings/info" element={<InfoSection/>} />
+            <Route path="/kepala-muhafidz/settings/trash" element={<TrashSection/>} />
+
 
             {/* Tambahkan route superadmin lainnya di sini */}
             <Route path="/kepala-muhafidz/laporan" element={<LaporanSetoranPage />} />
