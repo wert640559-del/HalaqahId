@@ -91,7 +91,7 @@ export default function LaporanSetoranPage() {
         <div className="flex flex-col sm:flex-row gap-3">
           {!loading && halaqahNames.length > 0 && (
             <Select value={activeHalaqah} onValueChange={setActiveHalaqah}>
-              <SelectTrigger className="w-full sm:w-[200px] bg-background shadow-sm">
+              <SelectTrigger className="w-full sm:w-50 bg-background shadow-sm">
                 <div className="flex items-center gap-2">
                   <FontAwesomeIcon icon={faUsers} className="h-3.5 w-3.5 text-primary/60" />
                   <SelectValue placeholder="Pilih Halaqah" />
@@ -110,7 +110,7 @@ export default function LaporanSetoranPage() {
           {/* Filter Periode (Bulan/Tahun) */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full sm:w-[220px] justify-start text-left font-normal shadow-sm">
+              <Button variant="outline" className="w-full sm:w-55 justify-start text-left font-normal shadow-sm">
                 <FontAwesomeIcon icon={faCalendarAlt} className="mr-2 h-4 w-4 opacity-50" />
                 {periodLabel}
               </Button>
@@ -167,7 +167,7 @@ export default function LaporanSetoranPage() {
       </div>
 
       {/* SECTION 2: CONTENT (Bagian yang Loading/Skeleton) */}
-      <div className="min-h-[400px]">
+      <div className="min-h-100">
         {loading ? (
           <div className="space-y-4 pt-2">
             {[1, 2, 3].map((i) => (

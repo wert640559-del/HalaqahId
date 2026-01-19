@@ -84,12 +84,12 @@ export default function KelolaMuhafizPage() {
 
   if (user?.role !== "superadmin") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[500px] animate-in fade-in zoom-in-95 duration-300">
+      <div className="flex flex-col items-center justify-center min-h-125 animate-in fade-in zoom-in-95 duration-300">
         <div className="bg-destructive/10 p-6 rounded-full mb-6">
           <FontAwesomeIcon icon={faShieldHalved} className="text-6xl text-destructive" />
         </div>
         <h2 className="text-2xl font-bold tracking-tight">Akses Ditolak</h2>
-        <p className="text-muted-foreground mt-2 max-w-[300px] text-center">
+        <p className="text-muted-foreground mt-2 max-w-75 text-center">
           Maaf, halaman ini hanya dapat diakses oleh administrator pusat.
         </p>
       </div>
@@ -100,7 +100,7 @@ export default function KelolaMuhafizPage() {
     <div className="space-y-4 md:space-y-6 max-w-7xl mx-auto">
       
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6 px-2 md:px-0">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6 md:px-0">
         <div>
           <MuhafizManagement/>
           <p className="text-sm md:text-base text-muted-foreground">

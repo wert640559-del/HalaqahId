@@ -146,9 +146,9 @@ export default function KepalaMuhafidzDashboard() {
           </CardHeader>
           <CardContent>
             {loadingSetoran ? (
-              <Skeleton className="h-[250px] w-full" />
+              <Skeleton className="h-62.5 w-full" />
             ) : (
-              <ChartContainer config={chartConfig} className="h-[250px] w-full">
+              <ChartContainer config={chartConfig} className="h-62.5 w-full">
                 {chartView === "pekan" ? (
                   <BarChart data={dataPekanIni}>
                     <CartesianGrid vertical={false} strokeOpacity={0.1} />
@@ -185,9 +185,9 @@ export default function KepalaMuhafidzDashboard() {
           </CardHeader>
           <CardContent>
             {loadingSetoran ? (
-              <Skeleton className="h-[250px] w-[250px] rounded-full mx-auto" />
+              <Skeleton className="h-62.5 w-62.5 rounded-full mx-auto" />
             ) : (
-              <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">
+              <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-62.5">
                 <PieChart>
                   <ChartTooltip content={<ChartTooltipContent hideLabel />} />
                   <Pie 
@@ -218,7 +218,7 @@ export default function KepalaMuhafidzDashboard() {
         <CardHeader className="flex flex-row items-center justify-between border-b bg-muted/10 py-4 px-6">
           <CardTitle className="text-base font-semibold">Muhafidz Baru Terdaftar</CardTitle>
           <Button variant="link" size="sm" asChild className="text-primary">
-            <Link to="/kelola-muhafiz">
+            <Link to="muhafiz">
               Lihat Semua <FontAwesomeIcon icon={faArrowRight} className="ml-2 h-3 w-3" />
             </Link>
           </Button>

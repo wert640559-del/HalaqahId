@@ -31,7 +31,6 @@ import {
   faSignInAlt,
   faEllipsisH,
 } from "@fortawesome/free-solid-svg-icons";
-import { UserCheck, UserX } from "lucide-react";
 
 interface DaftarAkunProps {
   muhafizList: Muhafiz[];
@@ -78,8 +77,8 @@ export function DaftarAkun({
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead className="w-[80px]">Muhafiz</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead className="w-20">Muhafiz</TableHead>
+              <TableHead>Halaqah</TableHead>
               <TableHead className="text-right">Aksi</TableHead>
             </TableRow>
           </TableHeader>
@@ -99,7 +98,7 @@ export function DaftarAkun({
 
   if (muhafizList.length === 0) {
     return (
-      <div className="flex min-h-[400px] flex-col items-center justify-center rounded-xl border border-dashed p-8 text-center animate-in fade-in duration-500">
+      <div className="flex min-h-400px flex-col items-center justify-center rounded-xl border border-dashed p-8 text-center animate-in fade-in duration-500">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
           <FontAwesomeIcon icon={faUserTie} className="h-8 w-8 text-muted-foreground" />
         </div>
@@ -121,8 +120,8 @@ export function DaftarAkun({
         <TableHeader>
           <TableRow className="bg-muted/30 hover:bg-muted/30">
             <TableHead className="font-bold text-sm md:text-base py-4">Informasi Muhafidz</TableHead>
-            <TableHead className="text-right font-bold py-4">Status</TableHead>
-            <TableHead className="text-right font-bold py-4 pr-6">Aksi</TableHead>
+            <TableHead className="text-right font-bold py-4 pr-10">Halaqah</TableHead>
+            <TableHead className="text-right font-bold py-4 pr-4">Aksi</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -131,7 +130,7 @@ export function DaftarAkun({
             
             return (
               <TableRow key={muhafiz.id_user} className="hover:bg-muted/10 transition-colors group">
-                <TableCell>
+                <TableCell className="py-4">
                   <div className="flex flex-col gap-0.5">
                     <span className="font-bold text-base md:text-lg tracking-tight leading-tight">
                       {muhafiz.username}
@@ -142,18 +141,18 @@ export function DaftarAkun({
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="text-right flex justify-end items-center py-4">
+                <TableCell className="text-right flex justify-end items-center py-7">
                   {isAktif ? (
-                    <div className="flex items-center ">
-                      <UserCheck className="text-green-500" />
+                    <div className="text-right pr-12 text-primary text-sm">
+                      ● Aktif
                     </div>
                   ) : (
-                    <div className="flex items-center">
-                      <UserX className="text-red-500"/>
+                    <div className="text-right pr-6 font-medium text-red-500 text-sm">
+                      ● Nonaktif
                     </div>
                   )}
                 </TableCell>
-                <TableCell className="text-right pr-6">
+                <TableCell className="text-right pr-4">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-muted group-hover:bg-muted/80">
