@@ -5,7 +5,7 @@ import { faUsers } from "@fortawesome/free-solid-svg-icons";
 
 // Services & Hooks
 import { halaqahService, type Halaqah } from "@/services/halaqahService";
-import { santriService, type Santri } from "@/services/santriService";
+import { type Santri } from "@/services/santriService";
 import { useSantri } from "@/hooks/useSantri";
 
 // Components
@@ -39,12 +39,12 @@ export default function KelolaHalaqah() {
 
   // State Santri
   const [selectedSantri, setSelectedSantri] = useState<Santri | null>(null);
-  const [isEditSantriOpen, setIsEditSantriOpen] = useState(false);
+  const [isSantriModalOpen, setIsSantriModalOpen] = useState(false);
   const [isDeleteSantriOpen, setIsDeleteSantriOpen] = useState(false);
   const [isMoveSantriOpen, setIsMoveSantriOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { santriList, loadSantri } = useSantri();
+  const { santriList, loadSantri, createSantri, updateSantri, deleteSantri } = useSantri();
 
   // Load Data
   const fetchData = useCallback(async () => {
@@ -52,7 +52,6 @@ export default function KelolaHalaqah() {
     try {
       const res = await halaqahService.getAllHalaqah();
       setHalaqahs(res.data);
-      // Load santri di background agar UI Halaqah tidak terhambat
       loadSantri();
     } catch (error) {
       toast.error("Gagal mengambil data halaqah");
@@ -65,7 +64,7 @@ export default function KelolaHalaqah() {
     fetchData();
   }, [fetchData]);
 
-  // OPTIMASI: Map santri ke ID Halaqah
+  // Optimasi: Map santri ke ID Halaqah untuk performa render
   const santriMap = useMemo(() => {
     return santriList.reduce((acc, s) => {
       const key = s.halaqah_id;
@@ -77,27 +76,36 @@ export default function KelolaHalaqah() {
 
   // --- HANDLER ACTIONS ---
 
-  // Edit Santri Submit
-  const handleEditSantriSave = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!selectedSantri) return;
+  // Handler Buka Modal Tambah Santri (dari Dropdown Halaqah)
+  const handleOpenAddSantri = (h: Halaqah) => {
+    setSelectedHalaqah(h);
+    setSelectedSantri(null); // Pastikan null untuk mode "Tambah"
+    setIsSantriModalOpen(true);
+  };
 
+  // Handler Buka Modal Edit Santri
+  const handleOpenEditSantri = (s: Santri) => {
+    setSelectedSantri(s);
+    setIsSantriModalOpen(true);
+  };
+
+  // Handler Simpan Santri (Create & Update)
+  const handleSaveSantri = async (payload: any) => {
     setIsSubmitting(true);
-    const formData = new FormData(e.currentTarget);
-    const payload = {
-      nama_santri: formData.get("nama_santri") as string,
-      nomor_telepon: formData.get("nomor_telepon") as string,
-      target: formData.get("target") as any,
-      halaqah_id: Number(formData.get("halaqah_id")),
-    };
-
     try {
-      await santriService.update(selectedSantri.id_santri, payload);
-      toast.success("Profil santri diperbarui");
-      setIsEditSantriOpen(false);
-      fetchData(); // Refresh list
+      if (selectedSantri) {
+        // Mode Edit
+        await updateSantri(selectedSantri.id_santri, payload);
+        toast.success("Profil santri diperbarui");
+      } else {
+        // Mode Tambah
+        await createSantri(payload);
+        toast.success("Santri baru berhasil ditambahkan");
+      }
+      setIsSantriModalOpen(false);
+      fetchData();
     } catch (error: any) {
-      toast.error(error.message || "Gagal memperbarui santri");
+      toast.error(error.message || "Gagal menyimpan data santri");
     } finally {
       setIsSubmitting(false);
     }
@@ -107,7 +115,7 @@ export default function KelolaHalaqah() {
   const handleDeleteSantriConfirm = async () => {
     if (!selectedSantri) return;
     try {
-      await santriService.delete(selectedSantri.id_santri);
+      await deleteSantri(selectedSantri.id_santri);
       toast.success("Santri berhasil dihapus");
       fetchData();
     } catch (error: any) {
@@ -120,7 +128,7 @@ export default function KelolaHalaqah() {
   // Move Santri Confirm
   const handleMoveSantriConfirm = async (santriId: number, targetHalaqahId: number) => {
     try {
-      await santriService.update(santriId, { halaqah_id: targetHalaqahId });
+      await updateSantri(santriId, { halaqah_id: targetHalaqahId });
       toast.success("Santri berhasil dipindahkan");
       fetchData();
     } catch (error: any) {
@@ -130,15 +138,19 @@ export default function KelolaHalaqah() {
   };
 
   return (
-    <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6">
-        <div>
-          <HalaqahManagement />
-          <p className="text-muted-foreground">Kelola kelompok bimbingan santri.</p>
-        </div>
+    <div className="space-y-4 md:space-y-6 max-w-7xl mx-auto">
+    
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6 px-2 md:px-0">
+      <div>
+        <HalaqahManagement />
+        <p className="text-sm md:text-base text-muted-foreground">
+          Kelola kelompok bimbingan santri.
+        </p>
+      </div>
+      <div className="w-full md:w-auto">
         <BuatHalaqah onSuccess={fetchData} />
       </div>
+    </div>
 
       {/* Content */}
       {!isLoadingHalaqah && halaqahs.length === 0 ? (
@@ -148,10 +160,11 @@ export default function KelolaHalaqah() {
           halaqahs={halaqahs}
           santriMap={santriMap}
           isLoading={isLoadingHalaqah}
+          onAddSantri={handleOpenAddSantri}
           onEdit={(h) => { setSelectedHalaqah(h); setIsEditHalaqahOpen(true); }}
           onDelete={(h) => { setSelectedHalaqah(h); setIsDeleteHalaqahOpen(true); }}
           onMoveSantri={(s) => { setSelectedSantri(s); setIsMoveSantriOpen(true); }}
-          onEditSantri={(s) => { setSelectedSantri(s); setIsEditSantriOpen(true); }}
+          onEditSantri={handleOpenEditSantri}
           onDeleteSantri={(s) => { setSelectedSantri(s); setIsDeleteSantriOpen(true); }}
         />
       )}
@@ -174,14 +187,12 @@ export default function KelolaHalaqah() {
         </>
       )}
 
-      {/* --- MODALS SANTRI --- */}
-      
-      {/* Edit Santri */}
+      {/* --- MODAL SANTRI (Unified Add/Edit) --- */}
       <SantriModal
-        isOpen={isEditSantriOpen}
-        onClose={() => setIsEditSantriOpen(false)}
-        selectedSantri={selectedSantri}
-        onSave={handleEditSantriSave}
+        isOpen={isSantriModalOpen}
+        onClose={() => setIsSantriModalOpen(false)}
+        selectedSantri={selectedSantri || (selectedHalaqah ? { halaqah_id: selectedHalaqah.id_halaqah } : null)}
+        onSave={handleSaveSantri}
         isAdmin={true}
         halaqahList={halaqahs}
         isSubmitting={isSubmitting}
