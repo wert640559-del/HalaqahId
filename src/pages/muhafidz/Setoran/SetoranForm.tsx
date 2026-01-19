@@ -24,7 +24,7 @@ import type { SetoranPayload } from "@/services/setoranService";
 
 interface SetoranFormProps {
   santriList: any[];
-  onSubmit: (data: SetoranPayload) => Promise<{ success: boolean }>; 
+  onSubmit: (data: SetoranPayload) => Promise<{ success: boolean }>;
   loading: boolean;
 }
 
@@ -32,7 +32,8 @@ export function SetoranForm({ santriList, onSubmit, loading }: SetoranFormProps)
   const form = useForm<SetoranFormValues>({
     resolver: zodResolver(setoranSchema) as any,
     defaultValues: {
-      santri_id: 0,
+      // 1. Tetap gunakan undefined agar placeholder "Pilih Santri" muncul otomatis
+      santri_id: undefined, 
       juz: 1,
       kategori: "HAFALAN",
       surat: "",
@@ -41,33 +42,51 @@ export function SetoranForm({ santriList, onSubmit, loading }: SetoranFormProps)
     },
   });
 
-const onFormSubmit = async (data: SetoranFormValues) => {
-  const result = await onSubmit(data);
-  
-  if (result.success) {
-    form.reset({
-      ...form.getValues(),
-      surat: "",
-      ayat: "1-10",
-      keterangan: "", 
-    });
-  }
-};
+  const onFormSubmit = async (values: SetoranFormValues) => {
+    // 2. PROTEKSI: Cek apakah santri_id benar-benar ada sebelum kirim
+    if (!values.santri_id) {
+      alert("Silakan pilih santri terlebih dahulu!");
+      return;
+    }
+
+    // 3. TRANSFORMASI: Pastikan payload yang dikirim ke service adalah Number murni
+    const payload: SetoranPayload = {
+      ...values,
+      santri_id: Number(values.santri_id),
+      juz: Number(values.juz),
+    };
+
+    const result = await onSubmit(payload);
+    
+    if (result.success) {
+      // Reset form, namun biarkan santri_id tetap undefined agar kembali ke placeholder
+      form.reset({
+        ...form.getValues(),
+        santri_id: undefined,
+        surat: "",
+        ayat: "1-10",
+      });
+    }
+  };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onFormSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="santri_id"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Santri</FormLabel>
-                <Select onValueChange={(v) => field.onChange(Number(v))} value={field.value.toString()}>
+                {/* 4. LOGIKA VALUE: Jika value undefined, kirim string kosong ke Select shadcn */}
+                <Select 
+                  onValueChange={(v) => field.onChange(v === "" ? undefined : Number(v))} 
+                  value={field.value ? field.value.toString() : ""}
+                >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Pilih santri" />
+                      <SelectValue placeholder="Pilih Santri" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -104,41 +123,52 @@ const onFormSubmit = async (data: SetoranFormValues) => {
               </FormItem>
             )}
           />
-
-          <FormField
-            control={form.control}
-            name="juz"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Juz</FormLabel>
-                <FormControl>
-                  <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <FormField
-            control={form.control}
-            name="surat"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Surah</FormLabel>
-                <FormControl><Input placeholder="Contoh: Al-Baqarah" {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        {/* Baris Sisanya (Juz, Surat, Ayat, Taqwim) tetap sama seperti sebelumnya */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="md:col-span-1">
+            <FormField
+              control={form.control}
+              name="juz"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Juz</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="md:col-span-3">
+            <FormField
+              control={form.control}
+              name="surat"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Surah</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Contoh: Al-Baqarah" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="ayat"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Ayat</FormLabel>
-                <FormControl><Input {...field} /></FormControl>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -149,15 +179,21 @@ const onFormSubmit = async (data: SetoranFormValues) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Taqwim</FormLabel>
-                <FormControl><Input {...field} /></FormControl>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
-        <div className="flex justify-end pt-2">
-          <Button type="submit" disabled={loading} className="w-full md:w-auto">
+        <div className="pt-4">
+          <Button 
+            type="submit" 
+            disabled={loading} 
+            className="w-full bg-[#65a30d] hover:bg-[#4d7c0f] text-white font-bold py-6"
+          >
             {loading ? "Menyimpan..." : "Simpan Setoran"}
           </Button>
         </div>
