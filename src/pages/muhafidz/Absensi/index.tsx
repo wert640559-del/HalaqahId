@@ -1,117 +1,64 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Save, Loader2 } from "lucide-react";
-
-// Import Components
-import { AbsensiTable } from "./AbsensiTable";
-import { AbsensiActions } from "./AbsensiActions";
-import { AbsensiHeader } from "./AbsensiHeader";
-
-// Import Hooks & Services
+import { format } from "date-fns";
 import { useSantri } from "@/hooks/useSantri";
 import { useAbsensi } from "@/hooks/useAbsensi";
+import { InputAbsensi } from "./InputAbsensi";
+import { RekapAbsensiTable } from "./RekapAbsensiTable";
+import { type AbsensiStatus } from "@/services/absensiService";
 
-export default function AbsensiPage() {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+export default function AbsensiLayout() {
+  const { santriList, loadSantri } = useSantri();
+  const { submitAbsensiBulk, isSubmitting } = useAbsensi();
+  const [attendanceMap, setAttendanceMap] = useState<Record<number, AbsensiStatus>>({});
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
-  // 1. Inisialisasi Hooks
-  const { santriList, loadSantri, isLoading: isLoadingSantri } = useSantri();
-  const { 
-    absensiMap, 
-    loadAbsensiByDate, 
-    submitAbsensi, 
-    updateLocalStatus, 
-    resetLocalAbsensi,
-    isLoading: isSaving 
-  } = useAbsensi();
+  useEffect(() => { loadSantri(); }, [loadSantri]);
 
-  // 2. Load Data (Dijalankan setiap kali tanggal berubah)
-  useEffect(() => {
-    const fetchData = async () => {
-      await loadSantri(); // Ambil daftar santri aktif
-      await loadAbsensiByDate(selectedDate); // Ambil data absensi yang sudah ada (jika ada)
-    };
-    fetchData();
-  }, [selectedDate, loadSantri, loadAbsensiByDate]);
-
-  // 3. Handlers
-  const handleSubmit = async () => {
-    try {
-      // Mengirim list santri agar hook bisa memetakan status dari absensiMap
-      await submitAbsensi(selectedDate, santriList);
-      alert("Data absensi berhasil disimpan!");
-    } catch (error: any) {
-      alert("Gagal menyimpan: " + error.message);
-    }
+  const handleSave = async () => {
+    const payload = Object.entries(attendanceMap).map(([id, status]) => ({
+      santri_id: Number(id),
+      status,
+      tanggal: format(selectedDate, "yyyy-MM-dd")
+    }));
+    await submitAbsensiBulk(payload);
   };
-
-  const handleReset = () => {
-    if (confirm("Reset semua status di tampilan ini ke HADIR?")) {
-      resetLocalAbsensi();
-    }
-  };
-
-  // 4. Transformasi data untuk Tabel
-  const rows = santriList.map((s) => ({
-    santri_id: s.id_santri,
-    namaSantri: s.nama_santri,
-    status: absensiMap[s.id_santri] || "HADIR",
-    setoranTerakhir: null, // Bisa dikembangkan nanti
-  }));
-
-  // 5. State Loading Gabungan
-  const isGlobalLoading = isLoadingSantri;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
-          <AbsensiHeader 
-            selectedDate={selectedDate} 
-            onDateChange={(d) => d && setSelectedDate(d)} 
-          />
-          
-          <Button 
-            onClick={handleSubmit} 
-            disabled={isSaving || isGlobalLoading}
-            className="bg-green-600 hover:bg-green-700 text-white shadow-sm min-w-[140px]"
-          >
-            {isSaving ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4 mr-2" />
-            )}
-            {isSaving ? "Menyimpan..." : "Simpan Absensi"}
-          </Button>
-        </CardHeader>
+      <Tabs defaultValue="input" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+          <TabsTrigger value="input">Input Harian</TabsTrigger>
+          <TabsTrigger value="rekap">Rekap Bulanan</TabsTrigger>
+        </TabsList>
 
-        <CardContent>
-          {isGlobalLoading ? (
-            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-              <Loader2 className="h-8 w-8 animate-spin mb-2" />
-              <p>Memuat data santri...</p>
-            </div>
-          ) : (
-            <>
-              <AbsensiTable 
-                rows={rows} 
-                onStatusChange={updateLocalStatus} 
+        <TabsContent value="input">
+          <Card>
+            <CardHeader>
+              <CardTitle>Absensi Santri - {format(selectedDate, "dd MMMM yyyy")}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <InputAbsensi 
+                santriList={santriList} 
+                attendanceMap={attendanceMap}
+                onStatusChange={(id, status) => setAttendanceMap(prev => ({...prev, [id]: status}))}
               />
-              
-              <AbsensiActions 
-                selectedDate={selectedDate}
-                onReset={handleReset}
-                onBackToToday={() => setSelectedDate(new Date())}
-                onSubmit={handleSubmit}
-                loading={isSaving}
-              />
-            </>
-          )}
-        </CardContent>
-      </Card>
+              <div className="flex justify-end">
+                <Button onClick={handleSave} disabled={isSubmitting}>
+                  {isSubmitting ? "Menyimpan..." : "Simpan Absensi"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="rekap">
+          {/* Komponen Tabel Matrix Bulanan yang sudah kita buat tadi */}
+          <RekapAbsensiTable /> 
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
