@@ -8,17 +8,16 @@ import { DaftarAkun } from "./DaftarAkun";
 import { EditAkun } from "./EditAkun";
 import { DeleteAkun } from "./DeleteAkun";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
-  faUserTie, 
   faInfoCircle,
   faLock,
   faShieldHalved
 } from "@fortawesome/free-solid-svg-icons";
+import { MuhafizManagement } from "@/components/ui/TypedText";
 
 export default function KelolaMuhafizPage() {
   const { user, impersonate } = useAuth();
@@ -85,12 +84,12 @@ export default function KelolaMuhafizPage() {
 
   if (user?.role !== "superadmin") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[500px] animate-in fade-in zoom-in-95 duration-300">
+      <div className="flex flex-col items-center justify-center min-h-125 animate-in fade-in zoom-in-95 duration-300">
         <div className="bg-destructive/10 p-6 rounded-full mb-6">
           <FontAwesomeIcon icon={faShieldHalved} className="text-6xl text-destructive" />
         </div>
         <h2 className="text-2xl font-bold tracking-tight">Akses Ditolak</h2>
-        <p className="text-muted-foreground mt-2 max-w-[300px] text-center">
+        <p className="text-muted-foreground mt-2 max-w-75 text-center">
           Maaf, halaman ini hanya dapat diakses oleh administrator pusat.
         </p>
       </div>
@@ -98,33 +97,21 @@ export default function KelolaMuhafizPage() {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-4 md:space-y-6 max-w-7xl mx-auto">
       
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6 md:px-0">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Kelola Akun Muhafidz</h2>
-          <p className="text-muted-foreground">
+          <MuhafizManagement/>
+          <p className="text-sm md:text-base text-muted-foreground">
             Manajemen hak akses dan profil pengampu halaqah
           </p>
         </div>
-        <BuatAkun onSuccess={handleRegisterSuccess} />
+        <div className="w-full md:w-auto">
+          <BuatAkun onSuccess={handleRegisterSuccess} />
+        </div>
       </div>
 
-      {/* Main Table Card */}
-      <Card className="shadow-sm border-border">
-        <CardHeader className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Daftar Akun</CardTitle>
-              <CardDescription>
-                Total terdaftar: <span className="font-bold text-foreground">{muhafizList.length} Akun</span>
-              </CardDescription>
-            </div>
-            <FontAwesomeIcon icon={faUserTie} className="text-muted-foreground/30 h-8 w-8" />
-          </div>
-        </CardHeader>
-        <Separator />
         <CardContent className="p-0">
           <DaftarAkun
             muhafizList={muhafizList}
@@ -136,8 +123,6 @@ export default function KelolaMuhafizPage() {
             onCreateClick={handleRegisterSuccess}
           />
         </CardContent>
-      </Card>
-
       {/* Security & Guidelines */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Alert className="bg-primary/5 border-primary/20 md:col-span-2">

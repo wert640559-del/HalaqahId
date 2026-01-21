@@ -119,7 +119,7 @@ export function DaftarHalaqah({
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[160px]">
+                  <DropdownMenuContent align="end" className="w-40">
                     <DropdownMenuLabel>Aksi Halaqah</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => onAddSantri(h)} className="cursor-pointer text-primary focus:text-primary font-medium">
@@ -149,7 +149,7 @@ export function DaftarHalaqah({
                       <TableHead className="h-9 px-2 text-xs font-bold">Nama Santri</TableHead>
                       <TableHead>Kontak</TableHead>
                       <TableHead>Target</TableHead>
-                      <TableHead className="text-right w-[100px]">Aksi</TableHead>
+                      <TableHead className="text-right w-25">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -182,7 +182,7 @@ export function DaftarHalaqah({
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-[160px]">
+                              <DropdownMenuContent align="end" className="w-40">
                                 <DropdownMenuLabel>Aksi Santri</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem 

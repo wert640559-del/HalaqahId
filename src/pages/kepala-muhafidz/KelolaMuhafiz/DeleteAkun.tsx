@@ -59,7 +59,7 @@ export function DeleteAkun({ muhafiz, isOpen, onClose, onSuccess }: DeleteAkunPr
 
   return (
     <AlertDialog open={isOpen} onOpenChange={handleClose}>
-      <AlertDialogContent className="sm:max-w-[425px]">
+      <AlertDialogContent className="sm:max-w-106.25">
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2 text-destructive">
             <FontAwesomeIcon icon={faTriangleExclamation} />
@@ -113,7 +113,7 @@ export function DeleteAkun({ muhafiz, isOpen, onClose, onSuccess }: DeleteAkunPr
             variant="destructive"
             onClick={handleDelete}
             disabled={confirmText !== "hapus" || isLoading}
-            className="min-w-[100px]"
+            className="min-w-25"
           >
             {isLoading ? (
               <FontAwesomeIcon icon={faCircleNotch} className="animate-spin mr-2" />

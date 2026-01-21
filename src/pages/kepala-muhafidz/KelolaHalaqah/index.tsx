@@ -140,7 +140,7 @@ export default function KelolaHalaqah() {
   return (
     <div className="space-y-4 md:space-y-6 max-w-7xl mx-auto">
     
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6 px-2 md:px-0">
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6 md:px-0">
       <div>
         <HalaqahManagement />
         <p className="text-sm md:text-base text-muted-foreground">
