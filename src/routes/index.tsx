@@ -12,6 +12,9 @@ import SettingsPage from "@/pages/settings";
 import LaporanSetoranPage from "@/pages/kepala-muhafidz/LaporanSetoran";
 import InfoSection from "@/pages/settings/InfoSection";
 import TrashSection from "@/pages/settings/TrashSection";
+import { DisplayProvider } from "@/context/DisplayContext";
+import PublicDisplay from "@/pages/display/PublicDisplay";
+import SantriDetail from "@/pages/display/SantriDetail";
 
 const ProtectedRoute = ({ allowedRoles }: { allowedRoles?: ("superadmin" | "muhafiz")[] }) => {
   const { user, isLoading } = useAuth();
@@ -53,6 +56,22 @@ export const AppRouter = () => {
   return (
     <Routes>
       {/* 🔓 Public Route: Login */}
+      <Route 
+        path="/display" 
+        element={
+          <DisplayProvider>
+            <PublicDisplay />
+          </DisplayProvider>
+        } 
+      />
+      <Route 
+        path="/display/santri/:id" 
+        element={
+          <DisplayProvider>
+            <SantriDetail /> 
+          </DisplayProvider>
+        } 
+      />
       <Route 
         path="/login" 
         element={user ? <Navigate to="/" replace /> : <LoginPage />} 
