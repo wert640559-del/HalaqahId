@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -8,59 +8,33 @@ import {
   faUserGraduate,
   faCheckCircle,
   faClock,
-  faBookOpen
+  faBookOpen,
+  faSpinner
 } from "@fortawesome/free-solid-svg-icons";
-
-// Data dummy untuk progres santri
-const dummyProgres = [
-  { 
-    id: 1, 
-    nama: "Ahmad Farhan", 
-    target: "SEDANG", 
-    capaian: 75, 
-    status: "On Track",
-    terakhirSetor: "2 hari lalu",
-    totalAyat: 150
-  },
-  { 
-    id: 2, 
-    nama: "Zaid Ramadhan", 
-    target: "INTENS", 
-    capaian: 90, 
-    status: "Excellent",
-    terakhirSetor: "Kemarin",
-    totalAyat: 280
-  },
-  { 
-    id: 3, 
-    nama: "Umar Mukhtar", 
-    target: "RINGAN", 
-    capaian: 60, 
-    status: "Perlu Bimbingan",
-    terakhirSetor: "3 hari lalu",
-    totalAyat: 85
-  },
-  { 
-    id: 4, 
-    nama: "Abdullah Haikal", 
-    target: "CUSTOM_KHUSUS", 
-    capaian: 85, 
-    status: "On Track",
-    terakhirSetor: "Kemarin",
-    totalAyat: 120
-  },
-];
+import { useProgres } from "@/hooks/useProgres";
 
 export default function ProgresSantriPage() {
+  const { progresData, loading, fetchProgres } = useProgres();
   const [filterStatus, setFilterStatus] = useState("semua");
   const [filterTarget, setFilterTarget] = useState("semua");
 
-  // Filter progres berdasarkan status dan target
-  const filteredProgres = dummyProgres.filter(progres => {
+  // Mengambil data dari API saat halaman pertama kali dimuat
+  useEffect(() => {
+    fetchProgres();
+  }, [fetchProgres]);
+
+  // Filter progres berdasarkan status dan target (Menggunakan data dari hook)
+  const filteredProgres = progresData.filter(progres => {
     const statusMatch = filterStatus === "semua" || progres.status === filterStatus;
     const targetMatch = filterTarget === "semua" || progres.target === filterTarget;
     return statusMatch && targetMatch;
   });
+
+  // Perhitungan statistik dinamis berdasarkan data API
+  const totalAyatAll = progresData.reduce((acc, curr) => acc + curr.totalAyat, 0);
+  const avgCapaian = progresData.length > 0 
+    ? (progresData.reduce((acc, curr) => acc + (curr.capaian || 0), 0) / progresData.length).toFixed(1) 
+    : "0";
 
   // Warna berdasarkan status
   const getStatusColor = (status: string) => {
@@ -123,9 +97,9 @@ export default function ProgresSantriPage() {
         </div>
 
         <div className="flex items-end">
-          <Button variant="outline" className="w-full md:w-auto">
+          <Button variant="outline" className="w-full md:w-auto" onClick={() => fetchProgres()}>
             <FontAwesomeIcon icon={faCalendarAlt} className="mr-2" />
-            Bulan Ini
+            Refresh Data
           </Button>
         </div>
       </div>
@@ -139,7 +113,7 @@ export default function ProgresSantriPage() {
             </div>
             <div>
               <p className="text-sm text-text-secondary dark:text-text-secondary-dark">Rata-rata Capaian</p>
-              <p className="text-2xl font-bold dark:text-white">77.5%</p>
+              <p className="text-2xl font-bold dark:text-white">{loading ? "..." : `${avgCapaian}%`}</p>
             </div>
           </div>
         </div>
@@ -151,7 +125,7 @@ export default function ProgresSantriPage() {
             </div>
             <div>
               <p className="text-sm text-text-secondary dark:text-text-secondary-dark">Total Ayat</p>
-              <p className="text-2xl font-bold dark:text-white">635</p>
+              <p className="text-2xl font-bold dark:text-white">{loading ? "..." : totalAyatAll}</p>
             </div>
           </div>
         </div>
@@ -163,7 +137,7 @@ export default function ProgresSantriPage() {
             </div>
             <div>
               <p className="text-sm text-text-secondary dark:text-text-secondary-dark">Santri Aktif</p>
-              <p className="text-2xl font-bold dark:text-white">{dummyProgres.length}</p>
+              <p className="text-2xl font-bold dark:text-white">{loading ? "..." : progresData.length}</p>
             </div>
           </div>
         </div>
@@ -172,13 +146,18 @@ export default function ProgresSantriPage() {
       {/* Tabel Progres */}
       <div className="rounded-xl border border-border bg-card dark:bg-surface-dark shadow-sm overflow-hidden">
         <div className="p-6 border-b border-border dark:border-border-dark">
-          <h3 className="font-semibold text-lg dark:text-white">Detail Progres Santri</h3>
-          <p className="text-sm text-text-secondary dark:text-text-secondary-dark">
-            Menampilkan {filteredProgres.length} dari {dummyProgres.length} santri
-          </p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="font-semibold text-lg dark:text-white">Detail Progres Santri</h3>
+              <p className="text-sm text-text-secondary dark:text-text-secondary-dark">
+                Menampilkan {filteredProgres.length} dari {progresData.length} santri
+              </p>
+            </div>
+            {loading && <FontAwesomeIcon icon={faSpinner} spin className="text-primary" />}
+          </div>
         </div>
 
-        {filteredProgres.length === 0 ? (
+        {filteredProgres.length === 0 && !loading ? (
           <div className="p-12 text-center">
             <FontAwesomeIcon icon={faChartLine} className="text-5xl text-text-secondary-light dark:text-text-secondary-dark mb-4" />
             <h4 className="font-medium dark:text-white mb-2">Tidak ada data</h4>
@@ -268,7 +247,7 @@ export default function ProgresSantriPage() {
           </div>
           <div className="flex items-center gap-2">
             <div className="h-3 w-3 rounded-full bg-orange-500" />
-            <span className="text-sm dark:text-white">Perlu Bimbingan (60%)</span>
+            <span className="text-sm dark:text-white">Perlu Bimbingan ({"<"}60%)</span>
           </div>
         </div>
       </div>
