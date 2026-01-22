@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { useSetoran } from "@/hooks/useSetoran";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SetoranForm } from "./SetoranForm";
-import { TahfidzAi } from "@/components/shared/TahfidzAi";
 
 export default function InputSetoranPage() {
   const { santriList, loading, fetchSantri, addSetoran } = useSetoran();
