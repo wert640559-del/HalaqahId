@@ -29,6 +29,11 @@ export default function DashboardLayout() {
     navigate("/kepala-muhafidz");
   };
 
+  const handleAvatarClick = () => {
+    const targetPath = user?.role === "superadmin" ? "/kepala-muhafidz/settings" : "/settings";
+    navigate(targetPath);
+  };
+
   return (
     <SidebarProvider>
       {!isMobile && <AppSidebar />}
@@ -54,65 +59,23 @@ export default function DashboardLayout() {
           <div className="flex items-center gap-1 sm:gap-3">
             <ThemeToggle />
 
-            <DropdownMenu>
-              <DropdownMenuTrigger className="focus:outline-none ml-1">
-                <Avatar className="h-8 w-8 border hover:opacity-80 transition-opacity">
-                  <AvatarImage src={user?.avatarUrl} />
-                  <AvatarFallback className={isImpersonating ? "bg-yellow-500/10 text-yellow-600" : "bg-primary/10 text-primary"}>
-                    {user?.username?.[0]?.toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </DropdownMenuTrigger>
-              
-              <DropdownMenuContent align="end" className="w-56 mt-2">
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user?.username}</p>
-                    <p className="text-xs leading-none text-muted-foreground capitalize">{user?.role}</p>
-                  </div>
-                </DropdownMenuLabel>
-                
-                <DropdownMenuSeparator />
-
-                {isImpersonating && (
-                  <DropdownMenuItem onClick={handleBackToSuperadmin} className="text-yellow-600 focus:text-yellow-600 focus:bg-yellow-500/10 cursor-pointer">
-                    <FontAwesomeIcon icon={faArrowLeft} className="mr-2 h-4 w-4" />
-                    Kembali ke Admin
-                  </DropdownMenuItem>
-                )}
-
-                <DropdownMenuItem onClick={() => navigate("/profile")} className="cursor-pointer">
-                  <FontAwesomeIcon icon={faUser} className="mr-2 h-4 w-4" />
-                  Profil Saya
-                </DropdownMenuItem>
-
-                <DropdownMenuItem 
-                  onClick={() => {
-                    const targetPath = user?.role === "superadmin" ? "/kepala-muhafidz/settings" : "/settings";
-                    navigate(targetPath);
-                  }} 
-                  className="cursor-pointer"
-                >
-                  <FontAwesomeIcon icon={faGear} className="mr-2 h-4 w-4" />
-                  Pengaturan
-                </DropdownMenuItem>
-
-                <DropdownMenuItem onClick={() => navigate("/kepala-muhafidz/tahfidzai")} className="cursor-pointer">
-                  <FontAwesomeIcon icon={faBookOpen} className="mr-2 h-4 w-4" />
-                  Tahfidz Ai
-                </DropdownMenuItem>
-
-                <DropdownMenuSeparator />
-                
-                <DropdownMenuItem 
-                  onClick={logout} 
-                  className="text-destructive focus:bg-destructive focus:text-destructive-foreground cursor-pointer"
-                >
-                  <FontAwesomeIcon icon={faSignOutAlt} className="mr-2 h-4 w-4" />
-                  Keluar
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <button 
+              onClick={handleAvatarClick}
+              className="focus:outline-none ml-1 relative group"
+            >
+              <Avatar className="h-8 w-8 border group-hover:ring-2 group-hover:ring-primary/30 transition-all">
+                <AvatarImage src={user?.avatarUrl} />
+                <AvatarFallback className={isImpersonating ? "bg-yellow-500/10 text-yellow-600" : "bg-primary/10 text-primary"}>
+                  {user?.username?.[0]?.toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              {isImpersonating && (
+                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
+                </span>
+              )}
+            </button>
           </div>
         </header>
 
