@@ -12,6 +12,10 @@ import SettingsPage from "@/pages/settings";
 import LaporanSetoranPage from "@/pages/kepala-muhafidz/LaporanSetoran";
 import InfoSection from "@/pages/settings/InfoSection";
 import TrashSection from "@/pages/settings/TrashSection";
+import { DisplayProvider } from "@/context/DisplayContext";
+import PublicDisplay from "@/pages/display/PublicDisplay";
+import SantriDetail from "@/pages/display/SantriDetail";
+import { TahfidzAi } from "@/components/shared/TahfidzAi";
 
 const ProtectedRoute = ({ allowedRoles }: { allowedRoles?: ("superadmin" | "muhafiz")[] }) => {
   const { user, isLoading } = useAuth();
@@ -54,6 +58,22 @@ export const AppRouter = () => {
     <Routes>
       {/* 🔓 Public Route: Login */}
       <Route 
+        path="/display" 
+        element={
+          <DisplayProvider>
+            <PublicDisplay />
+          </DisplayProvider>
+        } 
+      />
+      <Route 
+        path="/display/santri/:id" 
+        element={
+          <DisplayProvider>
+            <SantriDetail /> 
+          </DisplayProvider>
+        } 
+      />
+      <Route 
         path="/login" 
         element={user ? <Navigate to="/" replace /> : <LoginPage />} 
       />
@@ -86,6 +106,8 @@ export const AppRouter = () => {
 
             {/* Tambahkan route superadmin lainnya di sini */}
             <Route path="/kepala-muhafidz/laporan" element={<LaporanSetoranPage />} />
+            <Route path="/kepala-muhafidz/tahfidzai" element={<TahfidzAi />} />
+
           </Route>
 
           {/* Rute Khusus Muhafidz */}
