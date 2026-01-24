@@ -8,26 +8,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGear, faSignOutAlt, faUser, faArrowLeft, faBookOpen } from "@fortawesome/free-solid-svg-icons";
+import {  faBookOpen } from "@fortawesome/free-solid-svg-icons";
 
 export default function DashboardLayout() {
-  const { user, logout, stopImpersonating, isImpersonating } = useAuth();
+  const { user, isImpersonating } = useAuth();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
-
-  const handleBackToSuperadmin = async () => {
-    await stopImpersonating();
-    navigate("/kepala-muhafidz");
-  };
 
   const handleAvatarClick = () => {
     const targetPath = user?.role === "superadmin" ? "/kepala-muhafidz/settings" : "/settings";
