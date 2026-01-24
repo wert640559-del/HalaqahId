@@ -8,7 +8,6 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDate } from "da
 import { id } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
-// Tambahkan Props agar bisa menerima data dari halaman Laporan Setoran
 interface RekapAbsensiProps {
   halaqahId?: number;
   externalSantriList?: any[];
@@ -20,22 +19,15 @@ export const RekapAbsensiTable = ({ halaqahId, externalSantriList }: RekapAbsens
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
 
-  // Jika ada list dari luar (Kepala), pakai itu. Jika tidak, pakai list dari hook (Muhafidz).
-  const currentSantriList = useMemo(() => {
-    return externalSantriList || hookSantri;
-  }, [externalSantriList, hookSantri]);
+  const currentSantriList = useMemo(() => externalSantriList || hookSantri, [externalSantriList, hookSantri]);
 
-  const daysInMonth = useMemo(() => {
-    return eachDayOfInterval({
-      start: startOfMonth(viewDate),
-      end: endOfMonth(viewDate)
-    });
-  }, [viewDate]);
+  const daysInMonth = useMemo(() => eachDayOfInterval({
+    start: startOfMonth(viewDate),
+    end: endOfMonth(viewDate)
+  }), [viewDate]);
 
   const fetchMonthlyRekap = useCallback(async () => {
-    // Tentukan ID Halaqah yang akan dipakai
     const targetHalaqahId = halaqahId || (currentSantriList.length > 0 ? currentSantriList[0].halaqah_id : null);
-    
     if (!targetHalaqahId) return;
     
     setIsLoadingData(true);
@@ -46,7 +38,6 @@ export const RekapAbsensiTable = ({ halaqahId, externalSantriList }: RekapAbsens
           .then(res => ({ tanggal: dateStr, data: res.data || [] }))
           .catch(() => ({ tanggal: dateStr, data: [] }));
       });
-
       const results = await Promise.all(requests);
       setMonthlyData(results);
     } catch (error) {
@@ -67,10 +58,23 @@ export const RekapAbsensiTable = ({ halaqahId, externalSantriList }: RekapAbsens
   const getStatusForCell = (santriId: number, dateStr: string) => {
     const dayData = monthlyData.find(m => m.tanggal === dateStr);
     if (!dayData) return null;
-    const record = dayData.data.find((item: any) => 
+    return dayData.data.find((item: any) => 
        item.santri_id === santriId || item.santri?.id_santri === santriId
-    );
-    return record?.status as AbsensiStatus | undefined;
+    )?.status as AbsensiStatus | undefined;
+  };
+
+  // FUNGSI BARU: Menghitung total status per santri
+  const calculateTotal = (santriId: number) => {
+    const totals = { HADIR: 0, IZIN: 0, SAKIT: 0, TERLAMBAT: 0, ALFA: 0 };
+    monthlyData.forEach(day => {
+      const status = day.data.find((item: any) => 
+        item.santri_id === santriId || item.santri?.id_santri === santriId
+      )?.status;
+      if (status && totals.hasOwnProperty(status)) {
+        totals[status as keyof typeof totals]++;
+      }
+    });
+    return totals;
   };
 
   const getStatusStyle = (status?: AbsensiStatus) => {
@@ -85,15 +89,11 @@ export const RekapAbsensiTable = ({ halaqahId, externalSantriList }: RekapAbsens
     }
   };
 
-  const getStatusInitial = (status?: AbsensiStatus) => {
-    if (!status) return "-";
-    return status.charAt(0);
-  };
+  const getStatusInitial = (status?: AbsensiStatus) => status ? status.charAt(0) : "-";
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        
+      <div className="flex justify-end">
         <Select value={format(viewDate, "yyyy-MM")} onValueChange={(val) => setViewDate(new Date(val))}>
           <SelectTrigger className="w-45"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -115,6 +115,10 @@ export const RekapAbsensiTable = ({ halaqahId, externalSantriList }: RekapAbsens
                   {getDate(date)}
                 </TableHead>
               ))}
+              {/* Kolom Header Total */}
+              {['H', 'I', 'S', 'T', 'A'].map(label => (
+                <TableHead key={label} className="text-center min-w-10 bg-muted/80 font-black border-r border-b text-primary">{label}</TableHead>
+              ))}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -123,20 +127,30 @@ export const RekapAbsensiTable = ({ halaqahId, externalSantriList }: RekapAbsens
                 <TableRow key={i}>
                   <TableCell className="sticky left-0 bg-background border-r border-b"><Skeleton className="h-4 w-24" /></TableCell>
                   {daysInMonth.map((d) => <TableCell key={d.toString()} className="p-1 border-r border-b"><Skeleton className="h-6 w-6 rounded-sm" /></TableCell>)}
+                  {Array(5).fill(0).map((_, idx) => <TableCell key={idx} className="p-1 border-r border-b"><Skeleton className="h-6 w-6 rounded-sm" /></TableCell>)}
                 </TableRow>
               ))
             ) : (
-              currentSantriList.map((s: any) => (
-                <TableRow key={s.id_santri || s.id} className="group hover:bg-muted/30">
-                  <TableCell className="font-medium sticky left-0 z-20 bg-background border-r border-b py-2 text-xs">
-                    <span className="truncate block w-32 md:w-40">{s.nama_santri || s.nama}</span>
-                  </TableCell>
-                  {daysInMonth.map((date) => {
-                    const status: any = getStatusForCell(s.id_santri || s.id, format(date, "yyyy-MM-dd"));
-                    return <TableCell key={date.toString()} className={cn(getStatusStyle(status), "border-b")}>{getStatusInitial(status)}</TableCell>;
-                  })}
-                </TableRow>
-              ))
+              currentSantriList.map((s: any) => {
+                const totals = calculateTotal(s.id_santri || s.id);
+                return (
+                  <TableRow key={s.id_santri || s.id} className="group hover:bg-muted/30">
+                    <TableCell className="font-medium sticky left-0 z-20 bg-background border-r border-b py-2 text-xs">
+                      <span className="truncate block w-32 md:w-40">{s.nama_santri || s.nama}</span>
+                    </TableCell>
+                    {daysInMonth.map((date) => {
+                      const status: any = getStatusForCell(s.id_santri || s.id, format(date, "yyyy-MM-dd"));
+                      return <TableCell key={date.toString()} className={cn(getStatusStyle(status), "border-b")}>{getStatusInitial(status)}</TableCell>;
+                    })}
+                    {/* Kolom Data Total */}
+                    <TableCell className="text-center font-bold border-b border-r bg-green-50/30 text-green-700">{totals.HADIR}</TableCell>
+                    <TableCell className="text-center font-bold border-b border-r bg-blue-50/30 text-blue-700">{totals.IZIN}</TableCell>
+                    <TableCell className="text-center font-bold border-b border-r bg-yellow-50/30 text-yellow-700">{totals.SAKIT}</TableCell>
+                    <TableCell className="text-center font-bold border-b border-r bg-orange-50/30 text-orange-700">{totals.TERLAMBAT}</TableCell>
+                    <TableCell className="text-center font-bold border-b border-r bg-red-50/30 text-red-700">{totals.ALFA}</TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
