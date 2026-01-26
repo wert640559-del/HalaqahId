@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 // Recharts
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
@@ -107,42 +108,46 @@ const SantriDetail = () => {
   }, [monthlyAbsensi, id]);
 
   if (loading) return <div className="flex h-screen items-center justify-center bg-background"><Skeleton className="h-12 w-12 rounded-full" /></div>;
-  if (!santri) return <div className="p-20 text-center">Data tidak ditemukan</div>;
+  if (!santri) return <div className="p-20 text-center bg-background text-foreground">Data tidak ditemukan</div>;
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
+    <div className="min-h-screen bg-background text-foreground p-4 md:p-8 transition-colors duration-300">
       <div className="mx-auto max-w-5xl space-y-6">
         
-        <Button variant="ghost" onClick={() => navigate("/display")} className="gap-2">
-          <ArrowLeft className="h-4 w-4" /> Kembali
-        </Button>
+        {/* Top Action Bar */}
+        <div className="flex items-center justify-between">
+          <Button variant="ghost" onClick={() => navigate("/display")} className="gap-2 hover:bg-card">
+            <ArrowLeft className="h-4 w-4" /> Kembali
+          </Button>
+          <ThemeToggle />
+        </div>
 
         {/* Profil Section */}
-        <Card className="overflow-hidden border-none shadow-sm">
+        <Card className="overflow-hidden border-none shadow-md bg-card">
           <CardContent className="p-6">
             <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
               <div className="flex items-center gap-4">
-                <Avatar className="h-16 w-16 border-2 border-primary/10">
-                  <AvatarFallback className="bg-primary text-primary-foreground font-bold text-xl">
+                <Avatar className="h-20 w-20 border-4 border-background shadow-sm">
+                  <AvatarFallback className="bg-primary text-primary-foreground font-bold text-2xl">
                     {santri.nama_santri.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h1 className="text-2xl font-bold tracking-tight uppercase">{santri.nama_santri}</h1>
-                  <div className="mt-1 flex flex-wrap gap-2">
-                    <Badge variant="secondary">{santri.target} TARGET</Badge>
-                    <Badge variant="outline" className="border-primary text-primary">{santri.halaqah?.name_halaqah}</Badge>
+                  <h1 className="text-2xl md:text-3xl font-bold tracking-tight uppercase">{santri.nama_santri}</h1>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <Badge variant="secondary" className="bg-secondary/50 text-secondary-foreground">{santri.target} TARGET</Badge>
+                    <Badge variant="outline" className="border-primary/50 text-primary">{santri.halaqah?.name_halaqah}</Badge>
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+              <div className="flex flex-col gap-2 text-sm text-muted-foreground bg-background/50 p-3 rounded-lg border border-border/50">
                 <div className="flex items-center gap-2">
-                  <GraduationCap className="h-4 w-4" /> 
-                  <span>Muhafidz: {muhafidz?.username || "-"}</span>
+                  <GraduationCap className="h-4 w-4 text-primary" /> 
+                  <span>Muhafidz: <b className="text-foreground">{muhafidz?.username || "-"}</b></span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <BookOpen className="h-4 w-4" /> 
-                  <span>Halaqah ID: {santri.halaqah_id}</span>
+                  <BookOpen className="h-4 w-4 text-primary" /> 
+                  <span>Halaqah ID: <b className="text-foreground">{santri.halaqah_id}</b></span>
                 </div>
               </div>
             </div>
@@ -151,44 +156,51 @@ const SantriDetail = () => {
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Chart Card */}
-          <Card className="border-none shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm uppercase tracking-wider">
-                <ChartIcon className="h-4 w-4" /> Statistik Kehadiran
+          <Card className="border-none shadow-md bg-card overflow-hidden">
+            <CardHeader className="border-b border-border/50 bg-muted/20">
+              <CardTitle className="flex items-center gap-2 text-xs uppercase tracking-widest font-bold">
+                <ChartIcon className="h-4 w-4 text-primary" /> Statistik Kehadiran
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="h-[200px]">
+            <CardContent className="pt-6">
+              <div className="h-[220px]">
                 {chartData.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie data={chartData} innerRadius={60} outerRadius={80} dataKey="value" stroke="none">
+                      <Pie data={chartData} innerRadius={60} outerRadius={80} dataKey="value" stroke="none" paddingAngle={5}>
                         {chartData.map((entry, index) => (
                           <Cell key={index} fill={entry.fill} />
                         ))}
                       </Pie>
-                      <Tooltip contentStyle={{ borderRadius: "var(--radius)", border: "none" }} />
-                      <Legend iconType="circle" wrapperStyle={{ fontSize: "12px" }} />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: "var(--popover)", 
+                          borderRadius: "var(--radius)", 
+                          border: "1px solid var(--border)",
+                          fontSize: "12px"
+                        }} 
+                      />
+                      <Legend iconType="circle" wrapperStyle={{ fontSize: "11px", paddingTop: "10px" }} />
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="flex h-full items-center justify-center text-xs text-muted-foreground italic">Tidak ada data</div>
+                  <div className="flex h-full items-center justify-center text-xs text-muted-foreground italic">Tidak ada data kehadiran</div>
                 )}
               </div>
             </CardContent>
           </Card>
 
           {/* Rekap Absensi Table Card */}
-          <Card className="border-none shadow-sm lg:col-span-2">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <Card className="border-none shadow-md lg:col-span-2 bg-card overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 bg-muted/20 space-y-0">
               <div>
-                <CardTitle className="flex items-center gap-2 text-sm uppercase tracking-wider">
-                  <Calendar className="h-4 w-4" /> Rekap Harian
+                <CardTitle className="flex items-center gap-2 text-xs uppercase tracking-widest font-bold">
+                  <Calendar className="h-4 w-4 text-primary" /> Rekap Harian
                 </CardTitle>
-                <CardDescription className="text-xs">{format(viewDate, "MMMM yyyy", { locale: localeId })}</CardDescription>
+                <CardDescription className="text-[10px] font-medium opacity-70">{format(viewDate, "MMMM yyyy", { locale: localeId })}</CardDescription>
               </div>
               <Select value={format(viewDate, "yyyy-MM")} onValueChange={(v) => setViewDate(new Date(v))}>
-                <SelectTrigger className="w-[140px] h-8 text-xs">
+                <SelectTrigger className="w-[140px] h-8 text-[11px] bg-background">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -199,22 +211,22 @@ const SantriDetail = () => {
                 </SelectContent>
               </Select>
             </CardHeader>
-            <CardContent>
-              <div className="rounded-md border bg-card">
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-muted/50">
+                    <TableRow className="bg-muted/30 hover:bg-muted/30 border-b border-border/50">
                       {daysInMonth.map((date) => (
-                        <TableHead key={date.toString()} className="h-8 border-r p-0 text-center text-[9px] font-bold">
+                        <TableHead key={date.toString()} className="h-9 border-r border-border/50 p-0 text-center text-[10px] font-bold min-w-[30px]">
                           {getDate(date)}
                         </TableHead>
                       ))}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    <TableRow>
+                    <TableRow className="hover:bg-transparent">
                       {isLoadingAbsensi ? (
-                        daysInMonth.map((d) => <TableCell key={d.toString()} className="border-r p-1"><Skeleton className="h-6 w-full" /></TableCell>)
+                        daysInMonth.map((d) => <TableCell key={d.toString()} className="border-r border-border/50 p-1"><Skeleton className="h-8 w-full" /></TableCell>)
                       ) : (
                         daysInMonth.map((date) => {
                           const dateStr = format(date, "yyyy-MM-dd");
@@ -223,12 +235,12 @@ const SantriDetail = () => {
                           
                           return (
                             <TableCell key={date.toString()} className={cn(
-                              "h-10 border-r p-0 text-center text-[10px] font-bold border-b",
-                              status === "HADIR" && "bg-primary text-primary-foreground",
-                              status === "IZIN" && "bg-blue-500 text-white",
-                              status === "SAKIT" && "bg-yellow-500 text-white",
-                              status === "ALFA" && "bg-destructive text-destructive-foreground",
-                              !status && "text-muted/20"
+                              "h-12 border-r border-border/50 p-0 text-center text-[11px] font-bold transition-colors",
+                              status === "HADIR" && "bg-primary/20 text-primary border-b-2 border-b-primary",
+                              status === "IZIN" && "bg-blue-500/20 text-blue-500 border-b-2 border-b-blue-500",
+                              status === "SAKIT" && "bg-yellow-500/20 text-yellow-600 border-b-2 border-b-yellow-500",
+                              status === "ALFA" && "bg-destructive/20 text-destructive border-b-2 border-b-destructive",
+                              !status && "text-muted-foreground/20"
                             )}>
                               {status ? status.charAt(0) : "-"}
                             </TableCell>
@@ -239,45 +251,65 @@ const SantriDetail = () => {
                   </TableBody>
                 </Table>
               </div>
+              <div className="p-3 flex gap-4 text-[9px] uppercase font-bold tracking-tighter opacity-60">
+                 <div className="flex items-center gap-1"><div className="w-2 h-2 bg-primary rounded-full"/> Hadir</div>
+                 <div className="flex items-center gap-1"><div className="w-2 h-2 bg-blue-500 rounded-full"/> Izin</div>
+                 <div className="flex items-center gap-1"><div className="w-2 h-2 bg-yellow-500 rounded-full"/> Sakit</div>
+                 <div className="flex items-center gap-1"><div className="w-2 h-2 bg-destructive rounded-full"/> Alfa</div>
+              </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Setoran Section */}
-        <Card className="border-none shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-sm uppercase tracking-wider">
-              <BookOpen className="h-4 w-4" /> Riwayat Setoran Hafalan
+        <Card className="border-none shadow-md bg-card overflow-hidden">
+          <CardHeader className="border-b border-border/50 bg-muted/20">
+            <CardTitle className="flex items-center gap-2 text-xs uppercase tracking-widest font-bold">
+              <BookOpen className="h-4 w-4 text-primary" /> Riwayat Setoran Hafalan
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader className="bg-muted/30">
-                <TableRow>
-                  <TableHead className="text-xs font-bold">TANGGAL</TableHead>
-                  <TableHead className="text-xs font-bold">MATERI</TableHead>
-                  <TableHead className="text-xs font-bold">KATEGORI</TableHead>
-                  <TableHead className="text-right text-xs font-bold">PREDIKAT</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {allSetoran.length > 0 ? (
-                  allSetoran.map((s) => (
-                    <TableRow key={s.id_setoran}>
-                      <TableCell className="text-xs text-muted-foreground">{format(parseISO(s.tanggal_setoran), "dd/MM/yy")}</TableCell>
-                      <TableCell>
-                        <div className="font-bold text-sm uppercase">{s.surat}</div>
-                        <div className="text-[10px] text-muted-foreground uppercase">Juz {s.juz} • Ayat {s.ayat}</div>
-                      </TableCell>
-                      <TableCell><Badge variant="outline" className="text-[10px] uppercase">{s.kategori}</Badge></TableCell>
-                      <TableCell className="text-right font-bold text-primary italic uppercase">{s.taqwim}</TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-muted/10">
+                  <TableRow className="hover:bg-transparent border-b border-border/50">
+                    <TableHead className="text-[10px] font-bold uppercase py-4 pl-6">Tanggal</TableHead>
+                    <TableHead className="text-[10px] font-bold uppercase py-4">Materi Hafalan</TableHead>
+                    <TableHead className="text-[10px] font-bold uppercase py-4">Kategori</TableHead>
+                    <TableHead className="text-right text-[10px] font-bold uppercase py-4 pr-6">Predikat</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {allSetoran.length > 0 ? (
+                    allSetoran.map((s) => (
+                      <TableRow key={s.id_setoran} className="border-b border-border/50 hover:bg-muted/5">
+                        <TableCell className="text-xs text-muted-foreground pl-6 whitespace-nowrap">
+                           {format(parseISO(s.tanggal_setoran), "dd MMM yyyy", { locale: localeId })}
+                        </TableCell>
+                        <TableCell>
+                          <div className="font-bold text-sm uppercase text-foreground">{s.surat}</div>
+                          <div className="text-[10px] text-muted-foreground uppercase mt-0.5">Juz {s.juz} • Ayat {s.ayat}</div>
+                        </TableCell>
+                        <TableCell>
+                           <Badge variant="outline" className="text-[9px] uppercase border-border/50 bg-background/50">
+                              {s.kategori}
+                           </Badge>
+                        </TableCell>
+                        <TableCell className="text-right font-black text-primary italic uppercase pr-6">
+                           {s.taqwim}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                       <TableCell colSpan={4} className="h-32 text-center text-muted-foreground italic">
+                          Belum ada riwayat setoran hafalan.
+                       </TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow><TableCell colSpan={4} className="h-24 text-center text-muted-foreground italic">Belum ada data setoran</TableCell></TableRow>
-                )}
-              </TableBody>
-            </Table>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
 
