@@ -1,96 +1,80 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSantri } from "@/hooks/useSantri";
 import { absensiService, type AbsensiStatus } from "@/services/absensiService";
-import { 
-  format, 
-  startOfMonth, 
-  endOfMonth, 
-  eachDayOfInterval, 
-  getDate, 
-} from "date-fns";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDate } from "date-fns";
 import { id } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
-export const RekapAbsensiTable = () => {
-  const { santriList, isLoading: loadingSantri, loadSantri } = useSantri();
+interface RekapAbsensiProps {
+  halaqahId?: number;
+  externalSantriList?: any[];
+}
+
+export const RekapAbsensiTable = ({ halaqahId, externalSantriList }: RekapAbsensiProps) => {
+  const { santriList: hookSantri, isLoading: loadingSantri, loadSantri } = useSantri();
   const [viewDate, setViewDate] = useState<Date>(new Date());
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
 
-  // 1. Dapatkan daftar tanggal untuk kolom (1 - 30/31)
-  const daysInMonth = useMemo(() => {
-    return eachDayOfInterval({
-      start: startOfMonth(viewDate),
-      end: endOfMonth(viewDate)
-    });
-  }, [viewDate]);
+  const currentSantriList = useMemo(() => externalSantriList || hookSantri, [externalSantriList, hookSantri]);
 
-  // 2. Fungsi untuk mengambil data satu bulan (Looping Harian sesuai spek API)
+  const daysInMonth = useMemo(() => eachDayOfInterval({
+    start: startOfMonth(viewDate),
+    end: endOfMonth(viewDate)
+  }), [viewDate]);
+
   const fetchMonthlyRekap = useCallback(async () => {
-    if (santriList.length === 0) return;
+    const targetHalaqahId = halaqahId || (currentSantriList.length > 0 ? currentSantriList[0].halaqah_id : null);
+    if (!targetHalaqahId) return;
     
     setIsLoadingData(true);
     try {
-      const halaqahId = santriList[0].halaqah_id;
-      
-      // Persiapkan request untuk setiap hari dalam sebulan
       const requests = daysInMonth.map(date => {
         const dateStr = format(date, "yyyy-MM-dd");
-        return absensiService.getRekapHalaqah(halaqahId, dateStr)
-          .then(res => ({
-            tanggal: dateStr,
-            data: res.data // Array berisi santri yang diabsen di hari itu
-          }))
+        return absensiService.getRekapHalaqah(targetHalaqahId, dateStr)
+          .then(res => ({ tanggal: dateStr, data: res.data || [] }))
           .catch(() => ({ tanggal: dateStr, data: [] }));
       });
-
       const results = await Promise.all(requests);
-      
-      // Gabungkan semua data harian ke dalam satu state
       setMonthlyData(results);
     } catch (error) {
       console.error("Gagal memuat rekap bulanan:", error);
     } finally {
       setIsLoadingData(false);
     }
-  }, [santriList, daysInMonth]);
+  }, [currentSantriList, daysInMonth, halaqahId]);
 
   useEffect(() => {
-    if (santriList.length === 0) loadSantri();
-  }, [loadSantri, santriList.length]);
+    if (!externalSantriList && hookSantri.length === 0) loadSantri();
+  }, [loadSantri, hookSantri.length, externalSantriList]);
 
   useEffect(() => {
     fetchMonthlyRekap();
   }, [fetchMonthlyRekap]);
 
-  // 3. Helper untuk mencari status santri di tanggal tertentu
   const getStatusForCell = (santriId: number, dateStr: string) => {
     const dayData = monthlyData.find(m => m.tanggal === dateStr);
     if (!dayData) return null;
-
-    // Cari santri di dalam array data harian
-    // Sesuai spek API: item.santri.id atau item.santri_id
-    const record = dayData.data.find((item: any) => 
+    return dayData.data.find((item: any) => 
        item.santri_id === santriId || item.santri?.id_santri === santriId
-    );
-    
-    return record?.status as AbsensiStatus | undefined;
+    )?.status as AbsensiStatus | undefined;
+  };
+
+  // FUNGSI BARU: Menghitung total status per santri
+  const calculateTotal = (santriId: number) => {
+    const totals = { HADIR: 0, IZIN: 0, SAKIT: 0, TERLAMBAT: 0, ALFA: 0 };
+    monthlyData.forEach(day => {
+      const status = day.data.find((item: any) => 
+        item.santri_id === santriId || item.santri?.id_santri === santriId
+      )?.status;
+      if (status && totals.hasOwnProperty(status)) {
+        totals[status as keyof typeof totals]++;
+      }
+    });
+    return totals;
   };
 
   const getStatusStyle = (status?: AbsensiStatus) => {
@@ -105,37 +89,17 @@ export const RekapAbsensiTable = () => {
     }
   };
 
-  const getStatusInitial = (status?: AbsensiStatus) => {
-    if (!status) return "-";
-    return status.charAt(0);
-  };
+  const getStatusInitial = (status?: AbsensiStatus) => status ? status.charAt(0) : "-";
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h3 className="text-lg font-medium">Laporan Kehadiran</h3>
-          <p className="text-sm text-muted-foreground">
-            Periode: {format(viewDate, "MMMM yyyy", { locale: id })}
-          </p>
-        </div>
-        
-        <Select 
-          value={format(viewDate, "yyyy-MM")} 
-          onValueChange={(val) => setViewDate(new Date(val))}
-        >
-          <SelectTrigger className="w-45">
-            <SelectValue placeholder="Pilih Bulan" />
-          </SelectTrigger>
+      <div className="flex justify-end">
+        <Select value={format(viewDate, "yyyy-MM")} onValueChange={(val) => setViewDate(new Date(val))}>
+          <SelectTrigger className="w-45"><SelectValue /></SelectTrigger>
           <SelectContent>
             {Array.from({ length: 12 }).map((_, i) => {
-              const d = new Date();
-              d.setMonth(d.getMonth() - i);
-              return (
-                <SelectItem key={i} value={format(d, "yyyy-MM")}>
-                  {format(d, "MMMM yyyy", { locale: id })}
-                </SelectItem>
-              );
+              const d = new Date(); d.setMonth(d.getMonth() - i);
+              return <SelectItem key={i} value={format(d, "yyyy-MM")}>{format(d, "MMMM yyyy", { locale: id })}</SelectItem>;
             })}
           </SelectContent>
         </Select>
@@ -144,62 +108,52 @@ export const RekapAbsensiTable = () => {
       <div className="rounded-md border overflow-x-auto relative shadow-sm scrollbar-thin">
         <Table className="border-separate border-spacing-0"> 
           <TableHeader>
-            <TableRow className="bg-muted/50 hover:bg-muted/50">
-              <TableHead className="min-w-40 sticky left-0 z-30 bg-muted font-bold border-r border-b">
-                Nama Santri
-              </TableHead>
+            <TableRow className="bg-muted/50">
+              <TableHead className="min-w-40 sticky left-0 z-30 bg-muted font-bold border-r border-b">Nama Santri</TableHead>
               {daysInMonth.map((date) => (
-                <TableHead 
-                  key={date.toString()} 
-                  className="text-center min-w-8.75 p-0 text-[10px] font-bold border-r border-b"
-                >
+                <TableHead key={date.toString()} className="text-center min-w-8.75 p-0 text-[10px] font-bold border-r border-b">
                   {getDate(date)}
                 </TableHead>
+              ))}
+              {/* Kolom Header Total */}
+              {['H', 'I', 'S', 'T', 'A'].map(label => (
+                <TableHead key={label} className="text-center min-w-10 bg-muted/80 font-black border-r border-b text-primary">{label}</TableHead>
               ))}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loadingSantri || isLoadingData ? (
+            {isLoadingData || (loadingSantri && !externalSantriList) ? (
               Array(5).fill(0).map((_, i) => (
                 <TableRow key={i}>
                   <TableCell className="sticky left-0 bg-background border-r border-b"><Skeleton className="h-4 w-24" /></TableCell>
-                  {daysInMonth.map((d) => (
-                    <TableCell key={d.toString()} className="p-1 border-r border-b"><Skeleton className="h-6 w-6 rounded-sm" /></TableCell>
-                  ))}
+                  {daysInMonth.map((d) => <TableCell key={d.toString()} className="p-1 border-r border-b"><Skeleton className="h-6 w-6 rounded-sm" /></TableCell>)}
+                  {Array(5).fill(0).map((_, idx) => <TableCell key={idx} className="p-1 border-r border-b"><Skeleton className="h-6 w-6 rounded-sm" /></TableCell>)}
                 </TableRow>
               ))
             ) : (
-              santriList.map((s) => (
-                <TableRow key={s.id_santri} className="group hover:bg-muted/30">
-                  <TableCell className="font-medium sticky left-0 z-20 bg-background border-r border-b shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] py-2 text-xs">
-                    <span className="truncate block w-32 md:w-40">{s.nama_santri}</span>
-                  </TableCell>
-                  
-                  {daysInMonth.map((date) => {
-                    const status = getStatusForCell(s.id_santri, format(date, "yyyy-MM-dd")) as any;
-                    return (
-                      <TableCell 
-                        key={date.toString()} 
-                        className={cn(getStatusStyle(status), "border-b")}
-                      >
-                        {getStatusInitial(status)}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              ))
+              currentSantriList.map((s: any) => {
+                const totals = calculateTotal(s.id_santri || s.id);
+                return (
+                  <TableRow key={s.id_santri || s.id} className="group hover:bg-muted/30">
+                    <TableCell className="font-medium sticky left-0 z-20 bg-background border-r border-b py-2 text-xs">
+                      <span className="truncate block w-32 md:w-40">{s.nama_santri || s.nama}</span>
+                    </TableCell>
+                    {daysInMonth.map((date) => {
+                      const status: any = getStatusForCell(s.id_santri || s.id, format(date, "yyyy-MM-dd"));
+                      return <TableCell key={date.toString()} className={cn(getStatusStyle(status), "border-b")}>{getStatusInitial(status)}</TableCell>;
+                    })}
+                    {/* Kolom Data Total */}
+                    <TableCell className="text-center font-bold border-b border-r bg-green-50/30 text-green-700">{totals.HADIR}</TableCell>
+                    <TableCell className="text-center font-bold border-b border-r bg-blue-50/30 text-blue-700">{totals.IZIN}</TableCell>
+                    <TableCell className="text-center font-bold border-b border-r bg-yellow-50/30 text-yellow-700">{totals.SAKIT}</TableCell>
+                    <TableCell className="text-center font-bold border-b border-r bg-orange-50/30 text-orange-700">{totals.TERLAMBAT}</TableCell>
+                    <TableCell className="text-center font-bold border-b border-r bg-red-50/30 text-red-700">{totals.ALFA}</TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
-      </div>
-
-      {/* Legend */}
-      <div className="flex flex-wrap gap-4 text-[10px] text-muted-foreground border-t pt-4">
-        <div className="flex items-center gap-1"><div className="w-2 h-2 bg-green-500 rounded-full" /> H (Hadir)</div>
-        <div className="flex items-center gap-1"><div className="w-2 h-2 bg-blue-500 rounded-full" /> I (Izin)</div>
-        <div className="flex items-center gap-1"><div className="w-2 h-2 bg-yellow-500 rounded-full" /> S (Sakit)</div>
-        <div className="flex items-center gap-1"><div className="w-2 h-2 bg-orange-500 rounded-full" /> T (Terlambat)</div>
-        <div className="flex items-center gap-1"><div className="w-2 h-2 bg-red-500 rounded-full" /> A (Alfa)</div>
       </div>
     </div>
   );
