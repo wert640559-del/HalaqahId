@@ -13,7 +13,7 @@ export function SettingItem({ icon, title, description, onClick, variant = "defa
   return (
     <button
       onClick={onClick}
-      className="flex items-center w-full transition-all group border-b last:border-0 px-4"
+      className="flex items-center w-full transition-all group px-4"
     >
       <div className={cn(
         "flex h-10 w-10 items-center justify-center rounded-lg mr-4 shrink-0",
