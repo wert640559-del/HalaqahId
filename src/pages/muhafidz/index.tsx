@@ -3,6 +3,8 @@ import SetoranPage from "./Setoran";
 import AbsensiPage from "./Absensi";
 import KelolaSantriPage from "./KelolaSantri"; 
 import ProgresSantriPage from "./ProgresSantri";
+import SettingsPage from "../settings";
+import InfoSection from "../settings/InfoSection";
 
 export default function MuhafidzPage() {
   return (
@@ -16,8 +18,11 @@ export default function MuhafidzPage() {
 
       <Route path="progres" element={<ProgresSantriPage />} />
       
-      {/* Halaman Riwayat */}
-      <Route path="riwayat" element={<div>Halaman Riwayat (Coming Soon)</div>} />
+      <Route path="settings">
+        <Route index element={<SettingsPage />} /> {/* Menu Utama Settings */}
+        {/* <Route path="account" element={<AccountSettings />} /> Page Akun */}
+        <Route path="info" element={<InfoSection />} /> {/* Page Informasi SOP */}
+      </Route>
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="." replace />} />

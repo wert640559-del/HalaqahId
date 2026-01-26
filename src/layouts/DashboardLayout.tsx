@@ -88,7 +88,7 @@ export default function DashboardLayout() {
 
                 <DropdownMenuItem 
                   onClick={() => {
-                    const targetPath = user?.role === "superadmin" ? "/kepala-muhafidz/settings" : "/settings";
+                    const targetPath = user?.role === "superadmin" ? "/kepala-muhafidz/settings" : "muhafidz/settings";
                     navigate(targetPath);
                   }} 
                   className="cursor-pointer"

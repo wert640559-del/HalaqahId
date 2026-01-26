@@ -11,7 +11,7 @@ export default function SettingsPage() {
   const { user } = useAuth();
   const isSuper = user?.role === "superadmin";
 
-  const basePath = isSuper ? "/kepala-muhafidz/settings" : "/settings";
+  const basePath = isSuper ? "/kepala-muhafidz/settings" : "/muhafidz/settings";
 
   return (
     <div className="space-y-6">
