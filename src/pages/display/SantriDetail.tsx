@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 // Recharts
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
@@ -129,12 +130,16 @@ const SantriDetail = () => {
   if (!santri) return <div className="p-20 text-center text-muted-foreground">Data santri dengan ID {id} tidak ditemukan.</div>;
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
+    <div className="min-h-screen bg-background text-foreground p-4 md:p-8 transition-colors duration-300">
       <div className="mx-auto max-w-5xl space-y-6">
         
-        <Button variant="ghost" onClick={() => navigate("/display")} className="gap-2">
-          <ArrowLeft className="h-4 w-4" /> Kembali
-        </Button>
+        {/* Top Action Bar */}
+        <div className="flex items-center justify-between">
+          <Button variant="ghost" onClick={() => navigate("/display")} className="gap-2 hover:bg-card">
+            <ArrowLeft className="h-4 w-4" /> Kembali
+          </Button>
+          <ThemeToggle />
+        </div>
 
         {/* Profil Section */}
         <Card className="border-none shadow-sm bg-gradient-to-br from-card to-muted/20">
