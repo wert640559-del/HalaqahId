@@ -12,7 +12,7 @@ import {
 import { id as localeId } from "date-fns/locale";
 
 // Shadcn UI Components
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,7 +24,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 
 // Icons
-import { ArrowLeft, BookOpen, GraduationCap, Calendar, PieChart as ChartIcon } from "lucide-react";
+import { ArrowLeft, BookOpen, PieChart as ChartIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const SantriDetail = () => {
