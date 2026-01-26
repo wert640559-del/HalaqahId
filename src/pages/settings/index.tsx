@@ -12,7 +12,7 @@ export default function SettingsPage() {
   const { user, logout, isImpersonating, stopImpersonating } = useAuth();
   const isSuper = user?.role === "superadmin";
 
-  const basePath = isSuper ? "/kepala-muhafidz/settings" : "/settings";
+  const basePath = isSuper ? "/kepala-muhafidz/settings" : "/muhafidz/settings";
 
   const handleBackToSuperadmin = async () => {
     if (stopImpersonating) {
