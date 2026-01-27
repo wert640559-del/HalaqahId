@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Info, Target, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -26,8 +26,168 @@ export default function InfoSection() {
       </div>
 
       <Accordion type="single" collapsible className="w-full">
+
+        <AccordionItem value="structure">
+          <AccordionTrigger className="text-base font-semibold hover:no-underline uppercase text-primary text-left">
+            STRUCTURE TAHFIDZ TEAM
+          </AccordionTrigger>
+          <AccordionContent className="flex flex-col gap-4 pt-2 pb-6 text-sm leading-relaxed">
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <p><span className="font-semibold text-muted-foreground">Koordinator Tahfidz	: </span> Akh Khodhir</p>
+                <div className="flex gap-1">
+                  <span className="font-semibold text-muted-foreground">Supervisor	:</span>
+                  <div>
+                    <p>1. Mas Najih</p>
+                    <p>2. Kak Kia</p>
+                  </div>
+                </div>
+                <p><span className="font-semibold text-muted-foreground">Muhafidz	: </span> 15 Orang ( 8 Ikhwan & 6 Akhwat)</p>
+                <p className="text-[10px] text-primary font-bold pt-2 italic">Uptodate : Desember 2025 </p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 bg-muted/30 p-3 rounded-lg border border-dashed">
+                <div>
+                  <p className="font-bold mb-1 underline">Ikhwan 	:</p>
+                  <div className="text-[13px] space-y-0.5">
+                    <p>Akh. Naufal</p>
+                    <p>Akh. Alfin</p>
+                    <p>Akh. Naufalino</p>
+                    <p>Akh. Fauzan</p>
+                    <p>Akh. Hubaib</p>
+                    <p>Akh. Hudzaifah</p>
+                    <p>Akh. Izza</p>
+                    <p>Akh. Dani</p>
+                    <p>Akh. Fauzi</p>
+                  </div>
+                </div>
+                <div>
+                  <p className="font-bold mb-1 underline">Akhwat : </p>
+                  <div className="text-[13px] space-y-0.5">
+                    <p>Ukht. Iklima</p>
+                    <p>Ukht. Rajwa</p>
+                    <p>Ukht. </p>
+                    <p>Ukht. Fina</p>
+                    <p>Ukht. Endah</p>
+                    <p>Ukht. Kia</p>
+                    <p>Ukht. Adiba</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* SECTION 1: VISI & MISI */}
+        <AccordionItem value="visi-misi">
+          <AccordionTrigger className="text-base font-semibold hover:no-underline uppercase text-primary text-left">
+            Visi & Misi
+          </AccordionTrigger>
+          <AccordionContent className="flex flex-col gap-4 pt-2 pb-6 text-sm leading-relaxed">
+            <div className="space-y-4">
+              <div>
+                <p className="font-bold text-xs uppercase text-muted-foreground mb-1">Visi:</p>
+                <p className="italic font-medium">
+                  "Menjadi bagian dari upaya membentuk generasi yang dekat dengan Al-Qur'an, mampu menyeimbangkan kesibukan belajar IT dengan interaksi yang berkualitas dengan Al-Qur'an, serta lulus dengan hafalan dan bacaan yang thayyib."
+                </p>
+              </div>
+              <div>
+                <p className="font-bold text-xs uppercase text-muted-foreground mb-1">Misi:</p>
+                <ul className="list-disc ml-5 space-y-1">
+                  <li>Memfasilitasi santri dengan program yang memudahkan santri untuk berinteraksi dengan Al-Qur'an, baik secara individu maupun kelompok.</li>
+                  <li>Membangun suasana pesantren yang kondusif bagi kegiatan tahfidz dan tadarus.</li>
+                  <li>Menawarkan program yang fleksibel dengan merancang program tahfiz yang fleksibel dan sesuai dengan kemampuan serta kesibukan santri.</li>
+                </ul>
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* SECTION 2: TUGAS UTAMA */}
+        <AccordionItem value="tugas-utama">
+          <AccordionTrigger className="text-base font-semibold hover:no-underline uppercase text-primary text-left">
+            Tugas Utama
+          </AccordionTrigger>
+          <AccordionContent className="flex flex-col gap-4 pt-2 pb-6 text-sm leading-relaxed">
+            <div className="grid grid-cols-1 gap-6">
+              <div className="space-y-2">
+                <p className="font-bold text-xs underline uppercase text-muted-foreground">Tugas Supervisor:</p>
+                <ul className="list-disc ml-5 space-y-1">
+                  <li>Optimalisasi Strategi Program</li>
+                  <li>Monitoring harian dan Dokumentasi Kegiatan</li>
+                  <li>Santri optimal dalam berinteraksi dengan Al-Qur'an</li>
+                </ul>
+              </div>
+              <div className="space-y-2">
+                <p className="font-bold text-xs underline uppercase text-muted-foreground">Tugas Tim Muhafiz:</p>
+                <ul className="list-disc ml-5 space-y-1">
+                  <li>Memastikan santri aktif mengikuti halaqah Al-Qur'an.</li>
+                  <li>Meningkatkan kemampuan santri dalam membaca Al-Qur'an dengan makhraj dan tajwid yang benar.</li>
+                  <li>Meningkatkan rata-rata jumlah hafalan santri per tahun.</li>
+                  <li>Meningkatkan kepuasan santri terhadap program tahfiz yang diselenggarakan.</li>
+                </ul>
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* SECTION 3: LEVEL HALAQAH */}
+        <AccordionItem value="level-halaqah">
+          <AccordionTrigger className="text-base font-semibold hover:no-underline uppercase text-primary text-left">
+            LEVEL HALAQAH
+          </AccordionTrigger>
+          <AccordionContent className="flex flex-col gap-4 pt-2 pb-6 text-sm leading-relaxed">
+            <div className="space-y-6">
+              {/* Halaqah Bacaan */}
+              <div>
+                <h4 className="font-bold underline italic mb-1 uppercase text-xs">Halaqah Bacaan</h4>
+                <p>Santri tidak hafalan, hanya fokus untuk memperbaiki bacaan dan akan diadakan tes di setiap bulannya untuk memastikan siap menghafal atau belum.</p>
+              </div>
+
+              {/* Halaqah Hafalan */}
+              <div>
+                <h4 className="font-bold underline italic mb-1 uppercase text-xs">Halaqah Hafalan</h4>
+                <ul className="list-disc ml-5 space-y-1">
+                  <li>Santri wajib setoran minimal sekali dalam 1 pekan.</li>
+                  <li>Santri menghafal dengan target yang sudah ditentukan.</li>
+                </ul>
+                
+                <div className="mt-3 p-3 bg-muted/50 rounded-lg border">
+                  <p className="font-bold text-xs mb-2">Dalam satu pekan halaqah diadakan pada:</p>
+                  <ul className="grid grid-cols-1 gap-1 text-[13px]">
+                    <li>Ahad : Ba’da Subuh</li>
+                    <li>Selasa : Ba’da Maghrib</li>
+                    <li>Rabu : Ba'da Maghrib</li>
+                    <li>Jum’at : Ba’da Maghrib</li>
+                    <li>Sabtu : Ba’da Maghrib</li>
+                  </ul>
+                </div>
+
+                <div className="mt-3">
+                  <p className="font-bold text-xs mb-2 italic">Adapun target setoran itu ada 3 kategori :</p>
+                  <ul className="list-disc ml-5 space-y-2 text-[13px]">
+                    <li><span className="font-semibold">Ringan :</span> Setiap dua pekan minimal setoran 1 halaman, berarti per bulan adalah 1 lembar (2 halaman).</li>
+                    <li><span className="font-semibold">Sedang :</span> Setiap dua pekan minimal setoran 1 lembar (2 halaman), berarti per bulan adalah 2 lembar (4 halaman.</li>
+                    <li><span className="font-semibold">Intens :</span> Setiap dua pekan minimal setoran 2 lembar (4 halaman), berarti per bulan adalah 4 lembar (8 halaman).</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Halaqah Khusus */}
+              <div>
+                <h4 className="font-bold underline italic mb-1 uppercase text-xs">Halaqah Khusus</h4>
+                <ul className="list-disc ml-5 space-y-1">
+                  <li>Santri diwajibkan untuk menyetorkan hafalan mereka di setiap halaqah, seminimal-minimalnya 4x sepekan.</li>
+                  <li>Target per pertemuan silahkan dipertimbangkan sesuai kemampuan santri masing-masing.</li>
+                  <li>Santri harus menentukan target untuk menyelesaikan setoran berapa juz dalam waktu dia berada di pondok.</li>
+                  <li>Santri bersedia menjadi penyimak untuk setoran teman-temannya. </li>
+                </ul>
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
         
-        {/* SECTION 1: SUPERVISOR */}
+        {/* SECTION 4: SUPERVISOR */}
         <AccordionItem value="supervisor">
           <AccordionTrigger className="text-base font-semibold hover:no-underline uppercase text-primary text-left">
             Supervisor
@@ -63,7 +223,7 @@ export default function InfoSection() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* SECTION 2: MUHAFIZ HAFALAN */}
+        {/* SECTION 4: MUHAFIZ HAFALAN */}
         <AccordionItem value="muhafiz-hafalan">
           <AccordionTrigger className="text-base font-semibold hover:no-underline uppercase text-primary text-left">
             Muhafiz Hafalan
@@ -117,7 +277,7 @@ export default function InfoSection() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* SECTION 3: MUHAFIZ BACAAN */}
+        {/* SECTION 5: MUHAFIZ BACAAN */}
         <AccordionItem value="muhafiz-bacaan">
           <AccordionTrigger className="text-base font-semibold hover:no-underline uppercase text-primary text-left">
             Muhafiz Bacaan
@@ -163,7 +323,7 @@ export default function InfoSection() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* SECTION 4: MUHAFIZ KHUSUS */}
+        {/* SECTION 6: MUHAFIZ KHUSUS */}
         <AccordionItem value="muhafiz-khusus">
           <AccordionTrigger className="text-base font-semibold hover:no-underline uppercase text-primary text-left">
             Muhafiz Halaqah Khusus
@@ -208,7 +368,7 @@ export default function InfoSection() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* SECTION 5: ALUR KERJA (HAFALAN, BACAAN, KHUSUS) */}
+        {/* SECTION 7: ALUR KERJA (HAFALAN, BACAAN, KHUSUS) */}
         <AccordionItem value="alur-kerja">
           <AccordionTrigger className="text-base font-semibold hover:no-underline uppercase text-primary text-left">
             Alur Kerja
@@ -258,7 +418,7 @@ export default function InfoSection() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* SECTION 6: REWARD */}
+        {/* SECTION 8: REWARD */}
         <AccordionItem value="reward" className="border-b-0">
           <AccordionTrigger className="text-base font-semibold hover:no-underline uppercase text-primary text-left">
             Reward Program
