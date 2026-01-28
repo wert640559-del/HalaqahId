@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { User, Info, Trash2, ChevronLeft, LogOut, ArrowLeft, Bot } from "lucide-react"; // Tambahkan icon
+import { Info, Trash2, ChevronLeft, LogOut, ArrowLeft, Bot } from "lucide-react"; // Tambahkan icon
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SettingItem } from "./SettingItem";
@@ -36,19 +36,13 @@ export default function SettingsPage() {
       <div className="space-y-6">
         {/* GRUP 1: PROFIL & AI */}
         <section className="space-y-3">
-          <h3 className="text-xs font-bold uppercase text-muted-foreground ml-1">Akun & Fitur</h3>
+          <h3 className="text-xs font-bold uppercase text-muted-foreground ml-1">Fitur Tambahan</h3>
           <Card>
-            <SettingItem 
-              icon={<User size={18} className="text-primary" />}
-              title="Profil Saya"
-              description="Informasi pribadi dan keamanan akun"
-              onClick={() => navigate(`${basePath}/account`)}
-            />
             <SettingItem 
               icon={<Bot size={18} className="text-blue-500" />}
               title="Tahfidz AI"
               description="Asisten virtual hafalan santri"
-              onClick={() => navigate("/kepala-muhafidz/tahfidzai")}
+              onClick={() => navigate(isSuper ? "/kepala-muhafidz/tahfidzai" : "/muhafidz/tahfidzai")}
             />
           </Card>
         </section>

@@ -8,13 +8,12 @@ import { DaftarAkun } from "./DaftarAkun";
 import { EditAkun } from "./EditAkun";
 import { DeleteAkun } from "./DeleteAkun";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faInfoCircle,
-  faLock,
   faShieldHalved
 } from "@fortawesome/free-solid-svg-icons";
 import { MuhafizManagement } from "@/components/ui/TypedText";
@@ -134,20 +133,6 @@ export default function KelolaMuhafizPage() {
             <p>• Email muhafidz harus unik dan valid untuk pengiriman laporan.</p>
           </AlertDescription>
         </Alert>
-
-        <Card className="bg-muted/30">
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center border shadow-sm">
-              <FontAwesomeIcon icon={faLock} className="text-muted-foreground h-4 w-4" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Keamanan Akun</p>
-              <p className="text-[11px] leading-tight text-muted-foreground mt-1 italic">
-                Password dienkripsi otomatis oleh sistem menggunakan hash Bcrypt.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Modals */}
