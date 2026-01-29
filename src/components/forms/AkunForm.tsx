@@ -177,7 +177,7 @@ export function AkunForm({ onSuccess }: AkunFormProps) {
         </div>
 
         <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t">
-          <FormDescription className="mr-auto text-xs text-left max-w-[200px]">
+          <FormDescription className="mr-auto text-xs text-left max-w-50">
             Akun akan langsung aktif setelah disimpan.
           </FormDescription>
           <Button type="submit" className="w-full sm:w-auto" disabled={isLoading}>

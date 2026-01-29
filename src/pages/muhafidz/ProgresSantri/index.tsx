@@ -10,6 +10,7 @@ import {
 
 // Import komponen tabel yang sudah Anda buat atau kita inline-kan
 import { HistoryTable } from "./HistoryTable"; 
+import { Progres } from "@/components/ui/TypedText";
 
 export default function ProgresSantriPage() {
   const { progresData, loading: loadingProgres, fetchProgres } = useProgres();
@@ -42,7 +43,7 @@ export default function ProgresSantriPage() {
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Header & Stats */}
       <div className="flex flex-col text-left">
-        <h2 className="text-2xl font-bold">Progres Santri</h2>
+        <Progres/>
         <p className="text-muted-foreground text-sm">Klik nama santri untuk melihat riwayat setoran</p>
       </div>
 
@@ -95,7 +96,7 @@ export default function ProgresSantriPage() {
                     </div>
 
                     {/* Kolom 2: Progress Bar (Span 4) - Sekarang lurus karena lebar kolom diatur Grid */}
-                    <div className="col-span-8 md:col-span-4 space-y-1">
+                    {/* <div className="col-span-8 md:col-span-4 space-y-1">
                       <div className="flex justify-between text-[11px] mb-1">
                         <span className="text-muted-foreground">Progres Hafalan</span>
                         <span className="font-bold">{santri.capaian}%</span>
@@ -106,13 +107,13 @@ export default function ProgresSantriPage() {
                           style={{ width: `${santri.capaian}%` }}
                         />
                       </div>
-                    </div>
+                    </div> */}
 
                     {/* Kolom 3: Terakhir Setor (Span 3) */}
-                    <div className="col-span-4 md:col-span-3 text-right">
+                    {/* <div className="col-span-4 md:col-span-3 text-right">
                       <p className="text-[10px] text-muted-foreground italic leading-none">Terakhir Setor</p>
                       <p className="text-sm font-medium mt-1">{santri.terakhirSetor}</p>
-                    </div>
+                    </div> */}
 
                   </div>
                 </AccordionTrigger>

@@ -101,7 +101,7 @@ export default function TrashSection() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[100px]">Username</TableHead>
+                  <TableHead className="w-25">Username</TableHead>
                   <TableHead className="hidden sm:table-cell">Email</TableHead>
                   <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>

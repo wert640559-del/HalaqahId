@@ -19,7 +19,7 @@ export function SetoranTable({ history, loading }: { history: any[]; loading: bo
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[200px]">Santri</TableHead>
+            <TableHead className="w-50">Santri</TableHead>
             <TableHead>Materi</TableHead>
             <TableHead className="text-center">Nilai</TableHead>
           </TableRow>

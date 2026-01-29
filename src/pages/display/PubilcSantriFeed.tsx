@@ -41,7 +41,7 @@ export function PublicSantriFeed({ santriData }: PublicSantriFeedProps) {
           <Table>
             <TableHeader className="bg-slate-50">
               <TableRow>
-                <TableHead className="w-[120px]">Tanggal</TableHead>
+                <TableHead className="w-30">Tanggal</TableHead>
                 <TableHead>Materi</TableHead>
                 <TableHead className="text-center">Kategori</TableHead>
                 <TableHead className="text-right">Nilai</TableHead>

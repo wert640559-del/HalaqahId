@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useSetoran } from "@/hooks/useSetoran";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SetoranForm } from "./SetoranForm";
+import { Setoran } from "@/components/ui/TypedText";
 
 export default function InputSetoranPage() {
   const { santriList, loading, fetchSantri, addSetoran } = useSetoran();
@@ -15,7 +16,7 @@ export default function InputSetoranPage() {
   return (
     <div className="container mx-auto py-6 space-y-8">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Setoran Hafalan</h1>
+        <Setoran/>
         <p className="text-muted-foreground">Kelola input harian dan pantau progress santri.</p>
       </div>
 

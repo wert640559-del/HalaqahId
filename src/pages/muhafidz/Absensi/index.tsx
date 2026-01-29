@@ -17,6 +17,7 @@ import { absensiService, type AbsensiStatus } from "@/services/absensiService";
 import { InputAbsensi } from "./InputAbsensi";
 import { RekapAbsensiTable } from "./RekapAbsensiTable";
 import { CalendarIcon } from "lucide-react";
+import { Absensi } from "@/components/ui/TypedText";
 
 export default function AbsensiPage() {
   // --- States ---
@@ -102,7 +103,7 @@ export default function AbsensiPage() {
     <div className="container mx-auto py-6 space-y-6 animate-in fade-in duration-500 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Absensi Santri</h1>
+          <Absensi/>
           <p className="text-muted-foreground text-sm">
             Kelola kehadiran harian dan lihat rekap bulanan halaqah.
           </p>

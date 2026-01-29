@@ -61,11 +61,11 @@ export const AttendanceDonutChart = ({
 
       <CardContent className="flex-1 pb-0">
         {loading ? (
-          <div className="flex items-center justify-center h-[280px]">
+          <div className="flex items-center justify-center h-70">
             <Skeleton className="h-48 w-48 rounded-full" />
           </div>
         ) : (
-          <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[300px]">
+          <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-75">
             <PieChart>
               <ChartTooltip 
                 cursor={false} 

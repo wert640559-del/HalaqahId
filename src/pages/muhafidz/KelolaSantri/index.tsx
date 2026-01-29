@@ -15,6 +15,7 @@ import { halaqahService } from "@/services/halaqahService";
 import { santriSchema } from "@/utils/zodSchema";
 import z from "zod";
 import { useAuth } from "@/context/AuthContext";
+import { KelolaSantri } from "@/components/ui/TypedText";
 
 export default function KelolaSantriPage() {
   const { isAdmin } = useAuth();
@@ -108,7 +109,7 @@ export default function KelolaSantriPage() {
       {/* 1. Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Kelola Santri</h2>
+          <KelolaSantri/>
           <p className="text-muted-foreground text-sm">Kelola data santri di sini.</p>
         </div>
         {!error && (

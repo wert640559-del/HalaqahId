@@ -12,7 +12,7 @@ export function HistoryTable({ data }: { data: any[] }) {
       <Table>
         <TableHeader className="bg-muted/50">
           <TableRow>
-            <TableHead className="w-[150px]">Tanggal</TableHead>
+            <TableHead className="w-37.5">Tanggal</TableHead>
             <TableHead>Materi</TableHead>
             <TableHead>Kategori</TableHead>
             <TableHead>Taqwim</TableHead>

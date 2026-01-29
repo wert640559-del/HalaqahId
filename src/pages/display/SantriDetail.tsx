@@ -142,7 +142,7 @@ const SantriDetail = () => {
         </div>
 
         {/* Profil Section */}
-        <Card className="border-none shadow-sm bg-gradient-to-br from-card to-muted/20">
+        <Card className="border-none shadow-sm bg-linear-to-br from-card to-muted/20">
           <CardContent className="p-6">
             <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
               <div className="flex items-center gap-4">
@@ -176,7 +176,7 @@ const SantriDetail = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[220px]">
+              <div className="h-55">
                 {chartData.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -208,7 +208,7 @@ const SantriDetail = () => {
                 Rekap Harian {format(viewDate, "MMMM yyyy", { locale: localeId })}
               </CardTitle>
               <Select value={format(viewDate, "yyyy-MM")} onValueChange={(v) => setViewDate(new Date(v))}>
-                <SelectTrigger className="w-[160px] h-9 bg-muted/50 border-none shadow-none focus:ring-0">
+                <SelectTrigger className="w-40 h-9 bg-muted/50 border-none shadow-none focus:ring-0">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -225,7 +225,7 @@ const SantriDetail = () => {
                     <TableHeader>
                       <TableRow className="bg-muted/30 hover:bg-muted/30 border-b">
                         {daysInMonth.map((date) => (
-                          <TableHead key={date.toString()} className="h-10 border-r p-0 text-center text-[10px] font-bold min-w-[32px]">
+                          <TableHead key={date.toString()} className="h-10 border-r p-0 text-center text-[10px] font-bold min-w-8">
                             {getDate(date)}
                           </TableHead>
                         ))}

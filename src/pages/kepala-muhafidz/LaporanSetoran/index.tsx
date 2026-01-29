@@ -145,7 +145,7 @@ export default function LaporanSetoranPage() {
       </div>
 
       <Tabs defaultValue="setoran" className="space-y-6">
-        <TabsList className="grid w-full md:w-[400px] grid-cols-2 bg-muted/50 p-1">
+        <TabsList className="grid w-full md:w-100 grid-cols-2 bg-muted/50 p-1">
           <TabsTrigger value="setoran" className="gap-2">
             <FontAwesomeIcon icon={faFileLines} className="h-3.5 w-3.5" /> Setoran
           </TabsTrigger>
