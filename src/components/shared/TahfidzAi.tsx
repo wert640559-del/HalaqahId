@@ -18,11 +18,14 @@ export const TahfidzAi = () => {
   const recognitionRef = useRef<any>(null);
   const fuseRef = useRef<any>(null);
 
+  // Normalisasi yang lebih kuat untuk menangani variasi penulisan Arab dari Whisper
   const normalize = (text: string) => {
     return text
-      .replace(/[\u064B-\u065F]/g, "") 
-      .replace(/[\u0670-\u0671]/g, "\u0627") 
-      .replace(/[\u06D6-\u06ED]/g, "") 
+      .replace(/[\u064B-\u065F]/g, "") // Hilangkan harakat
+      .replace(/[إأآا]/g, "ا")       // Standarisasi Alif
+      .replace(/ة/g, "ه")            // Standarisasi Ta Marbutha
+      .replace(/ى/g, "ي")            // Standarisasi Ya
+      .replace(/[\u06D6-\u06ED]/g, "") // Hilangkan tanda waqaf
       .trim();
   };
 
@@ -39,10 +42,13 @@ export const TahfidzAi = () => {
           }))
         );
         setFullQuran(allAyahs);
+        
+        // Menggunakan threshold lebih ketat (0.35) agar hasil awal lebih relevan
         fuseRef.current = new Fuse(allAyahs, {
           keys: ["normalizedText"],
-          threshold: 0.4,
-          includeScore: true
+          threshold: 0.35,
+          includeScore: true,
+          ignoreLocation: true // Mencari di seluruh bagian ayat
         });
       } catch (err) {
         console.error("Gagal memuat Al-Quran", err);
@@ -74,26 +80,72 @@ export const TahfidzAi = () => {
   const handleFinalProcess = async (audioBlob: Blob) => {
     setIsProcessing(true);
     try {
+      // 1. Transkripsi Audio via Whisper Groq
       const formData = new FormData();
       formData.append("file", audioBlob, "audio.m4a");
       formData.append("model", "whisper-large-v3");
       formData.append("language", "ar");
 
-      const res = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
+      const resWhisper = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
         method: "POST",
         headers: { Authorization: `Bearer ${GROQ_API_KEY}` },
         body: formData,
       });
-      const data = await res.json();
-      const finalResult = data.text;
+      const dataWhisper = await resWhisper.json();
+      const finalResult = dataWhisper.text;
       setLiveTranscript(finalResult);
 
       if (finalResult && fuseRef.current) {
-        const results = fuseRef.current.search(normalize(finalResult));
-        if (results.length > 0) setDetectedAyah(results[0].item);
-        else setDetectedAyah("not_found");
+        // 2. Cari Top 5 Kandidat dengan Fuse.js
+        const searchResults = fuseRef.current.search(normalize(finalResult), { limit: 5 });
+
+        if (searchResults.length > 0) {
+          // Format kandidat untuk dikirim ke AI Reranker
+          const candidates = searchResults.map((r: any, idx: number) => ({
+            index: idx,
+            text: r.item.text,
+            surah: r.item.surahName,
+            ayah: r.item.numberInSurah
+          }));
+
+          // 3. Gunakan LLM untuk menentukan ayat yang paling tepat (Reranking)
+          const resAi = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: { 
+              "Authorization": `Bearer ${GROQ_API_KEY}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              model: "llama-3.3-70b-versatile",
+              messages: [
+                {
+                  role: "system",
+                  content: "You are a Quran expert. I will provide a transcribed Arabic text and a list of candidates. Identify which candidate matches the input best, even if the input has spelling errors. Return ONLY the index number."
+                },
+                {
+                  role: "user",
+                  content: `Input: "${finalResult}"\nCandidates: ${JSON.stringify(candidates)}`
+                }
+              ],
+              temperature: 0
+            })
+          });
+
+          const aiData = await resAi.json();
+          const bestIndex = parseInt(aiData.choices[0].message.content.trim());
+          
+          // Pilih hasil berdasarkan keputusan AI
+          const finalSelection = (!isNaN(bestIndex) && searchResults[bestIndex]) 
+            ? searchResults[bestIndex].item 
+            : searchResults[0].item;
+
+          setDetectedAyah(finalSelection);
+        } else {
+          setDetectedAyah("not_found");
+        }
       }
     } catch (err) {
+      console.error("Error:", err);
       setDetectedAyah("not_found");
     } finally {
       setIsProcessing(false);
