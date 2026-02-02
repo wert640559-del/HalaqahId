@@ -112,6 +112,7 @@ export const AppRouter = () => {
 
           {/* Rute Khusus Muhafidz */}
           <Route element={<ProtectedRoute allowedRoles={["muhafiz"]} />}>
+            <Route path="/muhafidz/tahfidzai" element={<TahfidzAi />} />
             <Route path="/muhafidz/*" element={<MuhafidzPage />} />
           </Route>
 
