@@ -50,10 +50,12 @@ export default function LaporanSetoranPage() {
   }, [fetchAllSetoran, fetchHalaqah, loadSantri]);
 
   const groupedData = useMemo(() => {
-    const filterDate = (selectedMonth !== null && selectedYear !== null) 
-      ? new Date(selectedYear, selectedMonth) 
-      : undefined;
-    return transformSetoranData(allSetoran, filterDate);
+    const filter = {
+      month: selectedMonth, 
+      year: selectedYear,   
+    };
+    
+    return transformSetoranData(allSetoran, filter);
   }, [allSetoran, selectedMonth, selectedYear]);
 
   const halaqahNames = Object.keys(groupedData);

@@ -1,5 +1,10 @@
 import { parseISO, getMonth, getYear } from "date-fns";
 
+interface DateFilter {
+  month: number | null;
+  year: number | null;
+}
+
 export const sanitizeDashboardData = (data: any[]) => {
   if (!data || !Array.isArray(data)) return [];
 
@@ -18,17 +23,20 @@ export const sanitizeDashboardData = (data: any[]) => {
   });
 };
 
-export const transformSetoranData = (data: any[], filterDate?: Date) => {
-  // Bersihkan data santri yang sudah dihapus terlebih dahulu
+export const transformSetoranData = (data: any[], filter?: DateFilter) => {
   const cleanData = sanitizeDashboardData(data);
 
   const filteredData = cleanData.filter((item) => {
-    if (!filterDate) return true;
+    if (!filter || (filter.month === null && filter.year === null)) return true;
+
     const itemDate = parseISO(item.tanggal_setoran);
-    return (
-      getMonth(itemDate) === getMonth(filterDate) &&
-      getYear(itemDate) === getYear(filterDate)
-    );
+    const itemMonth = getMonth(itemDate);
+    const itemYear = getYear(itemDate);
+
+    const monthMatch = filter.month === null || itemMonth === filter.month;
+    const yearMatch = filter.year === null || itemYear === filter.year;
+
+    return monthMatch && yearMatch;
   });
 
   return filteredData.reduce((acc: any, item: any) => {
