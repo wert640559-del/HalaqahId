@@ -8,30 +8,15 @@ import InfoSection from "../settings/InfoSection";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
 import { Card } from "@/components/ui/card";
-import { useAuth } from "@/context/AuthContext";
 
 export default function MuhafidzPage() {
-  const { user } = useAuth();
-
-  const hasNoHalaqah = user?.role === "muhafiz" && !user?.id_halaqah;
 
   return (
     <Routes>
-      {hasNoHalaqah ? (
-        <>
-          <Route index element={<NoHalaqahState />} />
-          <Route path="/setoran" element={<NoHalaqahState />} />
-          <Route path="santri" element={<NoHalaqahState />} />
-          <Route path="progres" element={<NoHalaqahState />} />
-        </>
-      ) : (
-        <>
-          <Route index element={<AbsensiPage />} />
-          <Route path="/setoran" element={<SetoranPage />} />
-          <Route path="santri" element={<KelolaSantriPage />} />
-          <Route path="progres" element={<ProgresSantriPage />} />
-        </>
-      )}
+      <Route index element={<AbsensiPage />} />
+      <Route path="/setoran" element={<SetoranPage />} />
+      <Route path="santri" element={<KelolaSantriPage />} />
+      <Route path="progres" element={<ProgresSantriPage />} />
 
       <Route path="settings">
         <Route index element={<SettingsPage />} />
