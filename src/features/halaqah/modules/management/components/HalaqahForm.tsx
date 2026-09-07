@@ -17,6 +17,8 @@ import { type SesiHalaqah } from "@/types/domain/sesi-halaqah";
 import { getErrorMessage } from "@/utils/error";
 import { type Muhafiz } from "@/features/muhafiz/types";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Term } from "@/components/ui/Term";
+import { useTerminology } from "@/hooks/useTerminology";
 
 const halaqahSchema = z.object({
   name_halaqah: z.string().min(3, "Nama halaqah minimal 3 karakter"),
@@ -37,6 +39,9 @@ interface HalaqahFormProps {
 }
 
 export function HalaqahForm({ initialData, onSuccess }: HalaqahFormProps) {
+  const labelHalaqah = useTerminology("HALAQAH");
+  const labelMuhafiz = useTerminology("MUHAFIZ");
+
   const [muhafizList, setMuhafizList] = useState<Muhafiz[]>([]);
   const [existingHalaqahs, setExistingHalaqahs] = useState<Halaqah[]>([]);
   const [sesiList, setSesiList] = useState<SesiHalaqah[]>([]);
@@ -123,7 +128,7 @@ export function HalaqahForm({ initialData, onSuccess }: HalaqahFormProps) {
         if (onSuccess) onSuccess();
       }, 1000);
     } catch (err) {
-      setError(getErrorMessage(err, "Gagal menyimpan halaqah"));
+      setError(getErrorMessage(err, `Gagal menyimpan ${labelHalaqah.toLowerCase()}`));
     } finally {
       setIsSubmitting(false);
     }
@@ -142,17 +147,17 @@ export function HalaqahForm({ initialData, onSuccess }: HalaqahFormProps) {
         <Alert variant="default" className="bg-green-50 border-green-200 text-green-800">
           <FontAwesomeIcon icon={faCheckCircle} className="mr-2" />
           <AlertDescription>
-            {initialData ? "Halaqah diperbarui!" : "Halaqah berhasil dibuat!"}
+            {initialData ? <><Term code="HALAQAH" /> diperbarui!</> : <><Term code="HALAQAH" /> berhasil dibuat!</>}
           </AlertDescription>
         </Alert>
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="name_halaqah">Nama Halaqah</Label>
+        <Label htmlFor="name_halaqah">Nama <Term code="HALAQAH" /></Label>
         <Input
           id="name_halaqah"
           {...register("name_halaqah")}
-          placeholder="Contoh: Halaqah Al-Furqan"
+          placeholder={`Contoh: ${labelHalaqah} Al-Furqan`}
           disabled={isSubmitting}
         />
         {errors.name_halaqah && (
@@ -161,19 +166,19 @@ export function HalaqahForm({ initialData, onSuccess }: HalaqahFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="id_muhafiz">Muhafiz Pengampu</Label>
+        <Label htmlFor="id_muhafiz"><Term code="MUHAFIZ" /> Pengampu</Label>
         <Select
           disabled={isLoadingData || isSubmitting}
           value={selectedMuhafizId !== 0 ? selectedMuhafizId.toString() : undefined}
           onValueChange={(value) => setValue("id_muhafiz", parseInt(value), { shouldValidate: true })}
         >
           <SelectTrigger>
-            <SelectValue placeholder={isLoadingData ? "Memuat data..." : "Pilih muhafiz yang tersedia"} />
+            <SelectValue placeholder={isLoadingData ? "Memuat data..." : `Pilih ${labelMuhafiz.toLowerCase()} yang tersedia`} />
           </SelectTrigger>
           <SelectContent>
             {availableMuhafiz.length === 0 && !isLoadingData ? (
               <div className="p-2 text-sm text-center text-muted-foreground">
-                Tidak ada muhafiz yang tersedia
+                Tidak ada {labelMuhafiz.toLowerCase()} yang tersedia
               </div>
             ) : (
               availableMuhafiz.map((m) => (
@@ -190,12 +195,12 @@ export function HalaqahForm({ initialData, onSuccess }: HalaqahFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label>Pilih Sesi Halaqah (Opsional)</Label>
+        <Label>Pilih Sesi <Term code="HALAQAH" /> (Opsional)</Label>
         {isLoadingData ? (
           <div className="text-sm text-muted-foreground p-3 border rounded-md">Memuat sesi...</div>
         ) : sesiList.length === 0 ? (
           <div className="text-sm text-muted-foreground p-3 border rounded-md text-center">
-            Belum ada sesi halaqah yang tersedia.
+            Belum ada sesi {labelHalaqah.toLowerCase()} yang tersedia.
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 border rounded-md p-3 max-h-40 overflow-y-auto bg-muted/20">

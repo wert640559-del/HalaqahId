@@ -27,6 +27,7 @@ import {
 import { type Santri } from "@/features/santri/types";
 import { type Halaqah } from "@/features/halaqah/api/halaqahService";
 import type { TargetSekolah } from "@/types/domain/target";
+import { Term } from "@/components/ui/Term";
 
 interface SantriTableProps {
   data: Santri[];
@@ -76,14 +77,16 @@ export function SantriTable({
       <TableHeader>
         <TableRow className="bg-muted/50 hover:bg-muted/50">
           <TableHead className="font-bold text-foreground w-[30%] min-w-[150px]">
-            Nama Santri
+            Nama <Term code="SANTRI" />
           </TableHead>
           <TableHead className="font-bold text-foreground w-[20%] min-w-[140px]">
             Nomor Telepon
           </TableHead>
           <TableHead className="font-bold text-foreground w-[20%] min-w-[120px]">Target</TableHead>
           {isAdmin && (
-            <TableHead className="font-bold text-foreground w-[20%] min-w-[120px]">Halaqah</TableHead>
+            <TableHead className="font-bold text-foreground w-[20%] min-w-[120px]">
+              <Term code="HALAQAH" />
+            </TableHead>
           )}
           <TableHead className="text-right font-bold text-foreground w-[10%] min-w-[80px]">
             Aksi
@@ -99,11 +102,11 @@ export function SantriTable({
             >
               {searchTerm ? (
                 <p>
-                  Tidak ada santri yang sesuai dengan pencarian{" "}
+                  Tidak ada <Term code="SANTRI" /> yang sesuai dengan pencarian{" "}
                   <span className="font-semibold">"{searchTerm}"</span>
                 </p>
               ) : (
-                <p>Belum ada data santri</p>
+                <p>Belum ada data <Term code="SANTRI" /></p>
               )}
             </TableCell>
           </TableRow>

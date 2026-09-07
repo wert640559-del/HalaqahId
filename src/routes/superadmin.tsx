@@ -19,6 +19,9 @@ const SuperadminSettingsPage = lazy(() =>
 const TrashPage = lazy(() =>
   import("@/features/settings/pages/TrashPage")
 );
+const TerminologySettingsPage = lazy(() =>
+  import("@/features/settings/pages/TerminologySettingsPage")
+);
 const KelolaBlogPage = lazy(() =>
   import("@/features/blog/pages/KelolaBlogPage")
 );
@@ -29,6 +32,7 @@ export const superadminRoutes: RouteObject[] = [
   { path: "/superadmin/users", element: <KelolaUserPage /> },
   { path: "/superadmin/audit-logs", element: <KelolaAuditLogPage /> },
   { path: "/superadmin/settings", element: <SuperadminSettingsPage /> },
+  { path: "/superadmin/settings/terminology", element: <TerminologySettingsPage /> },
   { path: "/superadmin/settings/trash", element: <TrashPage /> },
   { path: "/superadmin/blog", element: <KelolaBlogPage /> },
 ];

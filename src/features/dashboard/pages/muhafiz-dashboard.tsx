@@ -22,10 +22,16 @@ import { id } from "date-fns/locale";
 import { useAuth } from "@/features/auth";
 import { useTour } from "@/hooks/useTour";
 import { type DriveStep } from "driver.js";
+import { Term } from "@/components/ui/Term";
+import { useTerminology } from "@/hooks/useTerminology";
 
 export function MuhafizDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const labelSantri = useTerminology("SANTRI");
+  const labelHalaqah = useTerminology("HALAQAH");
+  const labelMuhafiz = useTerminology("MUHAFIZ");
+
   const {
     isLoading,
     halaqahName,
@@ -48,8 +54,8 @@ export function MuhafizDashboard() {
     {
       element: '[data-tour="dashboard-header"]',
       popover: {
-        title: "Dashboard Muhafiz 🌟",
-        description: "Selamat datang di halaman utama Anda! Di sini Anda dapat memantau perkembangan hafalan dan kehadiran santri secara cepat.",
+        title: `Dashboard ${labelMuhafiz}`,
+        description: `Selamat datang di halaman utama Anda! Pantau perkembangan hafalan dan kehadiran ${labelSantri.toLowerCase()} secara cepat.`,
         side: "bottom",
         align: "start"
       }
@@ -57,8 +63,8 @@ export function MuhafizDashboard() {
     {
       element: '[data-tour="dashboard-actions"]',
       popover: {
-        title: "Aksi Cepat ⚡",
-        description: "Gunakan tombol ini untuk mencatat kehadiran halaqah atau merekam setoran hafalan baru santri Anda secara langsung.",
+        title: "Aksi Cepat",
+        description: `Gunakan tombol ini untuk mencatat kehadiran ${labelHalaqah.toLowerCase()} atau merekam setoran hafalan baru ${labelSantri.toLowerCase()} Anda secara langsung.`,
         side: "bottom",
         align: "end"
       }
@@ -66,8 +72,8 @@ export function MuhafizDashboard() {
     {
       element: '[data-tour="dashboard-kpis"]',
       popover: {
-        title: "Statistik Utama 📈",
-        description: "Pantau jumlah santri aktif, persentase kehadiran hari ini, jumlah setoran pekan ini, dan pencapaian target hafalan.",
+        title: "Statistik Utama",
+        description: `Pantau jumlah ${labelSantri.toLowerCase()} aktif, persentase kehadiran hari ini, jumlah setoran pekan ini, dan pencapaian target hafalan.`,
         side: "bottom",
         align: "center"
       }
@@ -75,8 +81,8 @@ export function MuhafizDashboard() {
     {
       element: '[data-tour="dashboard-charts"]',
       popover: {
-        title: "Visualisasi Grafik 📊",
-        description: "Analisis grafik aktivitas setoran pekan/bulanan serta diagram lingkaran kehadiran halaqah Anda.",
+        title: "Visualisasi Grafik",
+        description: `Analisis grafik aktivitas setoran pekan/bulanan serta diagram lingkaran kehadiran ${labelHalaqah.toLowerCase()} Anda.`,
         side: "top",
         align: "center"
       }
@@ -84,8 +90,8 @@ export function MuhafizDashboard() {
     {
       element: '[data-tour="dashboard-progress"]',
       popover: {
-        title: "Progres Target Santri 🎯",
-        description: "Lihat daftar capaian real-time santri Anda terhadap target hafalan sekolah untuk memastikan kelancaran belajar.",
+        title: `Progres Target ${labelSantri}`,
+        description: `Lihat daftar capaian real-time ${labelSantri.toLowerCase()} Anda terhadap target hafalan sekolah untuk memastikan kelancaran belajar.`,
         side: "top",
         align: "start"
       }
@@ -177,7 +183,7 @@ export function MuhafizDashboard() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b pb-8">
         <div className="space-y-1" data-tour="dashboard-header">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight">Dashboard Muhafiz</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Dashboard <Term code="MUHAFIZ" /></h1>
             <Button
               onClick={restartTour}
               variant="ghost"
@@ -189,7 +195,7 @@ export function MuhafizDashboard() {
             </Button>
           </div>
           <p className="text-muted-foreground text-sm">
-            Kelola perkembangan setoran hafalan dan kehadiran santri di halaqah{" "}
+            Kelola perkembangan setoran hafalan dan kehadiran {labelSantri.toLowerCase()} di {labelHalaqah.toLowerCase()}{" "}
             <span className="font-semibold text-foreground">{halaqahName}</span>
           </p>
         </div>
@@ -226,12 +232,12 @@ export function MuhafizDashboard() {
         {/* CARD 1: TOTAL SANTRI */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Santri</CardTitle>
+            <CardTitle className="text-sm font-medium">Total <Term code="SANTRI" /></CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{progresData.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">Aktif di halaqah ini</p>
+            <p className="text-xs text-muted-foreground mt-1">Aktif di {labelHalaqah.toLowerCase()} ini</p>
           </CardContent>
         </Card>
 
@@ -244,7 +250,7 @@ export function MuhafizDashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{todayAttendanceStats.percentage}%</div>
             <p className="text-xs text-muted-foreground mt-1">
-              {todayAttendanceStats.present} dari {todayAttendanceStats.total} santri hadir
+              {todayAttendanceStats.present} dari {todayAttendanceStats.total} {labelSantri.toLowerCase()} hadir
             </p>
           </CardContent>
         </Card>
@@ -257,7 +263,7 @@ export function MuhafizDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{weeklySetoranCount}</div>
-            <p className="text-xs text-muted-foreground mt-1">Penyetoran berhasil tercatat</p>
+            <p className="text-xs text-muted-foreground mt-1">Total riwayat hafalan tercatat</p>
           </CardContent>
         </Card>
 
@@ -269,7 +275,9 @@ export function MuhafizDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{targetAchievedCount}</div>
-            <p className="text-xs text-muted-foreground mt-1">Santri menyelesaikan target</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {targetAchievedCount} dari {progresData.length} {labelSantri.toLowerCase()} tuntas
+            </p>
           </CardContent>
         </Card>
       </div>

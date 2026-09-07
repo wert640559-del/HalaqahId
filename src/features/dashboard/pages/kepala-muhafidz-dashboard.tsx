@@ -5,12 +5,17 @@ import { LaporanChartSection } from "@/features/setoran/modules/laporan";
 import { useDashboardData } from "../hooks/useDashboardData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { UserX, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Term } from "@/components/ui/Term";
+import { useTerminology } from "@/hooks/useTerminology";
+import { Button } from "@/components/ui/button";
 
 export function KepalaMuhafidzDashboard() {
   const navigate = useNavigate();
+  const labelSantri = useTerminology("SANTRI");
+  const labelHalaqah = useTerminology("HALAQAH");
+
   const {
     loading,
     chartView,
@@ -32,9 +37,9 @@ export function KepalaMuhafidzDashboard() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard Kepala Muhafiz</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Dashboard Kepala <Term code="MUHAFIZ" /></h1>
           <p className="text-muted-foreground">
-            Kelola halaqah, santri, dan laporan secara terpusat
+            Kelola {labelHalaqah.toLowerCase()}, {labelSantri.toLowerCase()}, dan laporan secara terpusat
           </p>
         </div>
         <Button

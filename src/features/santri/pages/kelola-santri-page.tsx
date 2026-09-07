@@ -12,12 +12,16 @@ import { type DriveStep } from "driver.js";
 import { HelpCircle } from "lucide-react";
 
 import { KelolaSantri } from "@/components/custom/typed-text";
+import { Term } from "@/components/ui/Term";
+import { useTerminology } from "@/hooks/useTerminology";
 
 export function KelolaSantriPage() {
   const { user } = useAuth();
   const isAdmin = user?.role === Role.SUPERADMIN || user?.role === Role.ADMIN || user?.role === Role.KOORDINATOR_TAHFIZ;
   
   const { santriList, isLoading, createSantri, updateSantri, deleteSantri } = useSantri();
+  const labelSantri = useTerminology("SANTRI");
+  const labelHalaqah = useTerminology("HALAQAH");
   
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -31,8 +35,8 @@ export function KelolaSantriPage() {
     {
       element: '[data-tour="kelola-santri-header"]',
       popover: {
-        title: "Kelola Santri 👥",
-        description: "Selamat datang! Halaman ini digunakan untuk melihat dan mengelola daftar santri aktif di halaqah Anda.",
+        title: `Kelola ${labelSantri}`,
+        description: `lihat dan kelola daftar ${labelSantri.toLowerCase()} aktif di ${labelHalaqah.toLowerCase()} Anda.`,
         side: "bottom",
         align: "start"
       }
@@ -40,8 +44,8 @@ export function KelolaSantriPage() {
     {
       element: '[data-tour="kelola-santri-add-btn"]',
       popover: {
-        title: "Tambah Santri Baru ➕",
-        description: "Klik tombol ini untuk mendaftarkan santri baru ke halaqah Anda dengan menentukan nama, nomor telepon orang tua, dan target hafalan.",
+        title: `Tambah ${labelSantri} Baru`,
+        description: `daftarkan ${labelSantri.toLowerCase()} baru ke ${labelHalaqah.toLowerCase()} Anda dab tentukan nama, nomor telepon orang tua, dan target hafalan.`,
         side: "bottom",
         align: "end"
       }
@@ -49,8 +53,8 @@ export function KelolaSantriPage() {
     {
       element: '[data-tour="kelola-santri-search-bar"]',
       popover: {
-        title: "Cari Nama Santri 🔍",
-        description: "Ketikkan nama santri di sini untuk menyaring tabel dan mencari santri secara instan.",
+        title: `Cari Nama ${labelSantri}`,
+        description: `Ketikkan nama ${labelSantri.toLowerCase()} di sini untuk menyaring tabel dan mencari data secara instan.`,
         side: "bottom",
         align: "start"
       }
@@ -58,8 +62,8 @@ export function KelolaSantriPage() {
     {
       element: '[data-tour="kelola-santri-table"]',
       popover: {
-        title: "Tabel Data Santri 📋",
-        description: "Menampilkan rincian profil santri, nama halaqah, target aktif, serta aksi Edit data atau Hapus data santri.",
+        title: `Tabel Data ${labelSantri} `,
+        description: `Menampilkan rincian profil ${labelSantri.toLowerCase()}, nama ${labelHalaqah.toLowerCase()}, target aktif, serta aksi Edit data atau Hapus data.`,
         side: "top",
         align: "center"
       }
@@ -107,11 +111,11 @@ export function KelolaSantriPage() {
 
   const handleDelete = useCallback(
     async (santri: Santri) => {
-      if (confirm(`Yakin ingin menghapus santri ${santri.nama_santri}?`)) {
+      if (confirm(`Yakin ingin menghapus ${labelSantri.toLowerCase()} ${santri.nama_santri}?`)) {
         await deleteSantri(santri.id_santri);
       }
     },
-    [deleteSantri]
+    [deleteSantri, labelSantri]
   );
 
   const handleSave = async (data: {
@@ -151,7 +155,7 @@ export function KelolaSantriPage() {
               variant="ghost"
               size="icon"
               className="h-6 w-6 text-muted-foreground hover:text-primary rounded-full"
-              title="Mulai Panduan Kelola Santri"
+              title={`Mulai Panduan Kelola ${labelSantri}`}
             >
               <HelpCircle className="h-4 w-4" />
             </Button>
@@ -160,7 +164,7 @@ export function KelolaSantriPage() {
         <div className="shrink-0" data-tour="kelola-santri-add-btn">
           <Button onClick={() => setIsModalOpen(true)}>
             <FontAwesomeIcon icon={faPlus} className="mr-2" />
-            Tambah Santri
+            Tambah <Term code="SANTRI" />
           </Button>
         </div>
       </div>
@@ -170,7 +174,7 @@ export function KelolaSantriPage() {
           <div className="relative w-full sm:w-72" data-tour="kelola-santri-search-bar">
             <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input 
-              placeholder="Cari nama santri..." 
+              placeholder={`Cari nama ${labelSantri.toLowerCase()}...`} 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9"
@@ -194,12 +198,12 @@ export function KelolaSantriPage() {
           <div className="p-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4 bg-muted/10">
             <div className="text-xs text-muted-foreground">
               {showAll ? (
-                <span>Menampilkan semua <strong>{filteredSantri.length}</strong> santri</span>
+                <span>Menampilkan semua <strong>{filteredSantri.length}</strong> {labelSantri.toLowerCase()}</span>
               ) : (
                 <span>
                   Menampilkan <strong>{Math.min((currentPage - 1) * 10 + 1, filteredSantri.length)}</strong> -{" "}
                   <strong>{Math.min(currentPage * 10, filteredSantri.length)}</strong> dari{" "}
-                  <strong>{filteredSantri.length}</strong> santri
+                  <strong>{filteredSantri.length}</strong> {labelSantri.toLowerCase()}
                 </span>
               )}
             </div>

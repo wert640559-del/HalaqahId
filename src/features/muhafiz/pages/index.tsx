@@ -20,9 +20,11 @@ import { AccessDenied } from "../components/AccessDenied";
 import { isKepalaRole } from "@/types/domain/enums";
 import { type Muhafiz } from "../types";
 import { type SesiHalaqah } from "@/types/domain/sesi-halaqah";
+import { useTerminology } from "@/hooks/useTerminology";
 
 export default function KelolaMuhafizPage() {
   const { user } = useAuth();
+  const labelMuhafiz = useTerminology("MUHAFIZ");
   const {
     muhafizList,
     activeMuhafizIds,
@@ -146,12 +148,12 @@ export default function KelolaMuhafizPage() {
               <div className="p-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4 bg-muted/10">
                 <div className="text-xs text-muted-foreground">
                   {showAll ? (
-                    <span>Menampilkan semua <strong>{filteredMuhafiz.length}</strong> muhafidz</span>
+                    <span>Menampilkan semua <strong>{filteredMuhafiz.length}</strong> {labelMuhafiz.toLowerCase()}</span>
                   ) : (
                     <span>
                       Menampilkan <strong>{Math.min((currentPage - 1) * 10 + 1, filteredMuhafiz.length)}</strong> -{" "}
                       <strong>{Math.min(currentPage * 10, filteredMuhafiz.length)}</strong> dari{" "}
-                      <strong>{filteredMuhafiz.length}</strong> muhafidz
+                      <strong>{filteredMuhafiz.length}</strong> {labelMuhafiz.toLowerCase()}
                     </span>
                   )}
                 </div>

@@ -36,6 +36,7 @@ const KategoriSettingsPage = lazy(() => import("@/features/settings/pages/Katego
 const TargetSettingsPage = lazy(() => import("@/features/settings/pages/TargetSettingsPage"));
 const UjianSettingsPage = lazy(() => import("@/features/settings/pages/UjianSettingsPage"));
 const FormSetoranSettingsPage = lazy(() => import("@/features/settings/pages/FormSetoranSettingsPage"));
+const TerminologySettingsPage = lazy(() => import("@/features/settings/pages/TerminologySettingsPage"));
 const ProgresSantriPage = lazy(() =>
   import("@/features/santri/pages/progres-santri-page").then((m) => ({ default: m.ProgresSantriPage }))
 );
@@ -116,6 +117,10 @@ export const kepalaRoutes: RouteObject[] = [
   {
     path: "/kepala-muhafidz/settings/form-setoran",
     element: <FormSetoranSettingsPage />,
+  },
+  {
+    path: "/kepala-muhafidz/settings/terminology",
+    element: <TerminologySettingsPage />,
   },
 
   // Kontrol per-halaqah

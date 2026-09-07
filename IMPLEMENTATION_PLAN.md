@@ -210,38 +210,42 @@
 **Objektif**: Label entity bisa dikustomisasi per-tenant.
 
 **Tasks**:
-- [ ] Buat `src/lib/hooks/useTerminology.ts`:
+- [x] Buat `src/lib/hooks/useTerminology.ts` & `src/hooks/useTerminology.ts`:
   ```ts
-  export function useTerminology(kode: string): string {
+  export function useTerminology(kode: string, fallback?: string): string {
     const { terminology } = useTenant();
     const term = terminology.find(t => t.kode_entity === kode);
-    return term?.label_custom || term?.label_default || kode;
+    return term?.label_custom || term?.label_default || fallback || kode;
   }
   
   // Contoh: useTerminology('SANTRI') → "Santri" atau "Murid" atau "Siswa"
   // useTerminology('HALAQAH') → "Halaqah" atau "Kelas" atau "Kelompok"
   // useTerminology('MUHAFIZ') → "Muhafiz" atau "Ustadz" atau "Guru"
   ```
-- [ ] Buat komponen `src/components/ui/Term.tsx`:
+- [x] Buat komponen `src/components/ui/Term.tsx`:
   ```tsx
   export function Term({ code }: { code: string }) {
     const label = useTerminology(code);
     return <>{label}</>;
   }
   ```
-- [ ] Update seluruh halaman yang punya label hardcoded:
+- [x] Update seluruh halaman yang punya label hardcoded:
   - "Santri" → `<Term code="SANTRI" />`
   - "Halaqah" → `<Term code="HALAQAH" />`
   - "Muhafiz" → `<Term code="MUHAFIZ" />`
   - "Sekolah" → `<Term code="SEKOLAH" />`
-- [ ] **Catatan**: Tidak perlu sekaligus semua, mulai dari:
+- [x] **Catatan**: Tidak perlu sekaligus semua, mulai dari:
   - Sidebar/navigation labels
   - Page titles
   - Form labels utama
+  - Pengaturan Terminologi Lembaga (UI & API)
 
 **Files to create/modify**:
 - `src/lib/hooks/useTerminology.ts` [NEW]
+- `src/hooks/useTerminology.ts` [NEW]
 - `src/components/ui/Term.tsx` [NEW]
+- `src/features/settings/modules/terminology/` [NEW]
+- `src/features/settings/pages/TerminologySettingsPage.tsx` [NEW]
 - Multiple pages [MODIFY — gradual]
 
 ---

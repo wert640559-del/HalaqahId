@@ -1,10 +1,11 @@
-import { Info, Trash2, ChevronLeft, LogOut, ArrowLeft, Bot, Link as LinkIcon, Building2, Layers, Target, GraduationCap, Sliders, UserCircle } from "lucide-react";
+import { Info, Trash2, ChevronLeft, LogOut, ArrowLeft, Bot, Link as LinkIcon, Building2, Layers, Target, GraduationCap, Sliders, UserCircle, Languages } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SettingItem } from "../components/SettingItem";
 import { Settings } from "@/components/custom/typed-text";
 import { Separator } from "@/components/ui/separator";
 import { useSettingsPage } from "../hooks/useSettingsPage";
+import { useTerminology } from "@/hooks/useTerminology";
 
 export default function SettingsPage() {
   const {
@@ -17,6 +18,11 @@ export default function SettingsPage() {
     handleBackToSuperadmin,
     handleCopyDisplayLink,
   } = useSettingsPage();
+
+  const labelSantri = useTerminology("SANTRI");
+  const labelSekolah = useTerminology("SEKOLAH");
+  const labelMuhafiz = useTerminology("MUHAFIZ");
+  const labelHalaqah = useTerminology("HALAQAH");
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto animate-in fade-in duration-500">
@@ -50,16 +56,22 @@ export default function SettingsPage() {
             <SettingItem 
               icon={<Bot size={18} className="text-blue-500" />}
               title="Tahfidz AI"
-              description="Asisten virtual hafalan santri"
+              description={`Asisten virtual hafalan ${labelSantri.toLowerCase()}`}
               onClick={() => navigate(isKepala ? "/kepala-muhafidz/tahfidzai" : "/muhafidz/tahfidzai")}
             />
             {isKepala && (
               <>
                 <SettingItem 
                   icon={<Building2 size={18} className="text-primary" />}
-                  title="Profil Sekolah"
-                  description="Kelola informasi dan alamat sekolah Anda"
+                  title={`Profil ${labelSekolah}`}
+                  description={`Kelola informasi dan alamat ${labelSekolah.toLowerCase()} Anda`}
                   onClick={() => navigate("/kepala-muhafidz/profil-sekolah")}
+                />
+                <SettingItem 
+                  icon={<Languages size={18} className="text-teal-500" />}
+                  title="Terminologi Lembaga"
+                  description="Kustomisasi sebutan istilah santri, halaqah, muhafiz"
+                  onClick={() => navigate("/kepala-muhafidz/settings/terminology")}
                 />
                 <SettingItem 
                   icon={<Layers size={18} className="text-violet-500" />}
@@ -76,7 +88,7 @@ export default function SettingsPage() {
                 <SettingItem 
                   icon={<Target size={18} className="text-orange-500" />}
                   title="Target Setoran"
-                  description="Atur target hafalan fleksibel untuk santri"
+                  description={`Atur target hafalan fleksibel untuk ${labelSantri.toLowerCase()}`}
                   onClick={() => navigate("/kepala-muhafidz/settings/target")}
                 />
                 <SettingItem 
@@ -106,13 +118,13 @@ export default function SettingsPage() {
                 <SettingItem 
                   icon={<LinkIcon size={18} className="text-emerald-500" />}
                   title="Salin Link Portal Publik"
-                  description="Bagikan akses ke wali santri"
+                  description={`Bagikan akses ke wali ${labelSantri.toLowerCase()}`}
                   onClick={handleCopyDisplayLink}
                 />
                 <SettingItem 
                   icon={<Trash2 size={18} className="text-destructive" />}
                   title="Tempat Sampah"
-                  description="Pulihkan data muhafiz atau halaqah"
+                  description={`Pulihkan data ${labelMuhafiz.toLowerCase()} atau ${labelHalaqah.toLowerCase()}`}
                   onClick={() => navigate(`${basePath}/trash`)}
                 />
               </>

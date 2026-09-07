@@ -13,6 +13,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertTriangle, ArrowRightLeft } from "lucide-react";
+import { Term } from "@/components/ui/Term";
+import { useTerminology } from "@/hooks/useTerminology";
 
 export function KelolaHalaqahPage() {
   const {
@@ -41,6 +43,9 @@ export function KelolaHalaqahPage() {
     handleMoveSantriConfirm,
     handleHalaqahSuccess,
   } = useHalaqahManagement();
+
+  const labelSantri = useTerminology("SANTRI");
+  const labelHalaqah = useTerminology("HALAQAH");
 
   const [targetHalaqahId, setTargetHalaqahId] = useState<string>("");
 
@@ -98,16 +103,16 @@ export function KelolaHalaqahPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-red-600">
               <AlertTriangle className="h-5 w-5" />
-              Hapus Santri
+              Hapus <Term code="SANTRI" />
             </DialogTitle>
             <DialogDescription className="pt-2">
-              Apakah Anda yakin ingin menghapus santri <strong>{selectedSantri?.nama_santri}</strong>?
+              Apakah Anda yakin ingin menghapus {labelSantri.toLowerCase()} <strong>{selectedSantri?.nama_santri}</strong>?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setIsDeleteSantriOpen(false)} disabled={isSubmitting}>Batal</Button>
             <Button variant="destructive" onClick={handleDeleteSantriConfirm} disabled={isSubmitting}>
-              {isSubmitting ? "Menghapus..." : "Hapus Santri"}
+              {isSubmitting ? "Menghapus..." : `Hapus ${labelSantri}`}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -118,16 +123,16 @@ export function KelolaHalaqahPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ArrowRightLeft className="h-5 w-5 text-primary" />
-              Pindah Halaqah Santri
+              Pindah <Term code="HALAQAH" /> <Term code="SANTRI" />
             </DialogTitle>
             <DialogDescription className="pt-2">
-              Pilih halaqah baru untuk <strong>{selectedSantri?.nama_santri}</strong>.
+              Pilih {labelHalaqah.toLowerCase()} baru untuk <strong>{selectedSantri?.nama_santri}</strong>.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <Select value={targetHalaqahId} onValueChange={setTargetHalaqahId}>
               <SelectTrigger>
-                <SelectValue placeholder="Pilih halaqah tujuan..." />
+                <SelectValue placeholder={`Pilih ${labelHalaqah.toLowerCase()} tujuan...`} />
               </SelectTrigger>
               <SelectContent>
                 {halaqahs.map((h) => (
