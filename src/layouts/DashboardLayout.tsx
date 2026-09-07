@@ -15,6 +15,7 @@ import { useIsMobile } from "@/utils/use-mobile";
 import { isKepalaRole, Role } from "@/types/domain/enums";
 import { useQuery } from "@tanstack/react-query";
 import { sekolahService } from "@/features/sekolah";
+import { useTenant } from "@/store/tenant-context";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBookOpen } from "@fortawesome/free-solid-svg-icons";
@@ -22,6 +23,7 @@ import { cn } from "@/lib/utils";
 
 export default function DashboardLayout() {
   const { user, isImpersonating } = useAuth();
+  const { brand } = useTenant();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
 
@@ -59,15 +61,25 @@ export default function DashboardLayout() {
             {!isMobile && <SidebarTrigger />}
 
             {isMobile && (
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-md">
-                <FontAwesomeIcon icon={faBookOpen} className="text-base" />
-              </div>
+              brand?.logo_url ? (
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg overflow-hidden bg-background border shadow-sm">
+                  <img
+                    src={brand.logo_url}
+                    alt={brand.nama_aplikasi || "Logo"}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                </div>
+              ) : (
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-md">
+                  <FontAwesomeIcon icon={faBookOpen} className="text-base" />
+                </div>
+              )
             )}
 
             <Separator orientation="vertical" className="h-6 hidden sm:block" />
 
             <h1 className="text-sm md:text-base lg:text-lg font-bold tracking-tight">
-              {isMobile ? user?.name : `Halo, ${user?.name}`}
+              {isMobile ? (brand?.nama_aplikasi || user?.name) : `Halo, ${user?.name}`}
             </h1>
           </div>
 
@@ -115,12 +127,16 @@ export default function DashboardLayout() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto overflow-x-hidden w-full bg-slate-50/50 dark:bg-transparent">
-          <div className="container mx-auto p-4 md:p-6 lg:p-10 max-w-7xl w-full box-border">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden w-full bg-slate-50/50 dark:bg-transparent flex flex-col justify-between">
+          <div className="container mx-auto p-4 md:p-6 lg:p-10 max-w-7xl w-full box-border flex-1">
             <Suspense fallback={<PageSkeleton />}>
               <Outlet />
             </Suspense>
           </div>
+          
+          <footer className="py-4 px-6 text-center text-xs text-muted-foreground border-t bg-background/50">
+            {brand?.copyright_text || `© ${new Date().getFullYear()} ${brand?.nama_aplikasi || "Halaqah.id"}. All rights reserved.`}
+          </footer>
         </main>
 
         {isMobile && <MobileDock />}

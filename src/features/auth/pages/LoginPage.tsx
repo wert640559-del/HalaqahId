@@ -18,6 +18,10 @@ export function LoginPage() {
 
       <div className="relative flex w-full flex-col items-center justify-center p-6 dark:bg-background-dark lg:w-1/2 overflow-y-auto">
         <div className="mx-auto w-full max-w-md space-y-8 py-10">
+          <div className="lg:hidden pb-2">
+            <LoginHeader variant="mobile" />
+          </div>
+
           <div className="space-y-2 text-center lg:text-left">
             <h2 className="text-3xl font-bold tracking-tight text-text-primary-light dark:text-text-primary-dark">
               Assalamu'alaikum

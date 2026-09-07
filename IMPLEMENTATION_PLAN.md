@@ -170,7 +170,7 @@
 **Objektif**: UI menggunakan branding tenant (logo, warna, nama).
 
 **Tasks**:
-- [ ] Buat `src/lib/hooks/useTenantTheme.ts`:
+- [x] Buat `src/lib/hooks/useTenantTheme.ts`:
   - Terapkan warna primer/sekunder dari TenantBrand ke CSS variables
   ```ts
   useEffect(() => {
@@ -182,21 +182,21 @@
     }
   }, [brand]);
   ```
-- [ ] Update `src/index.css`: tambah CSS variables untuk tenant theming
+- [x] Update `src/index.css`: tambah CSS variables untuk tenant theming
   ```css
   :root {
-    --color-primary: #4F46E5;     /* default, overridden by tenant */
-    --color-secondary: #7C3AED;   /* default, overridden by tenant */
+    --color-primary: oklch(0.648 0.2 131.684);    /* default, overridden by tenant */
+    --color-secondary: oklch(0.967 0.001 286.375);  /* default, overridden by tenant */
   }
   ```
-- [ ] Update `DashboardLayout`:
+- [x] Update `DashboardLayout`:
   - Logo dari `brand.logo_url` (fallback ke logo default)
   - Nama aplikasi dari `brand.nama_aplikasi` (fallback ke "Halaqah.id")
   - Copyright dari `brand.copyright_text`
-- [ ] Update login page:
+- [x] Update login page:
   - Background dari `brand.login_background_url`
   - Logo dari `brand.logo_url`
-- [ ] Update favicon dinamis dari `brand.favicon_url`
+- [x] Update favicon dinamis dari `brand.favicon_url`
 
 **Files to create/modify**:
 - `src/lib/hooks/useTenantTheme.ts` [NEW]
