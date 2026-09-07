@@ -108,7 +108,7 @@
 **Objektif**: App bisa resolve tenant dan menyimpan konteks tenant.
 
 **Tasks**:
-- [ ] Buat type `src/types/domain/tenant.ts`:
+- [x] Buat type `src/types/domain/tenant.ts`:
   ```ts
   export interface Tenant {
     id_tenant: number;
@@ -139,14 +139,14 @@
     config: Record<string, unknown> | null;
   }
   ```
-- [ ] Buat `src/store/tenant-context.tsx`:
+- [x] Buat `src/store/tenant-context.tsx`:
   ```tsx
   // TenantProvider: resolve tenant dari slug, simpan di context
   // useTenant(): { tenant, brand, terminology, features, isLoading }
   // useTerminology(code): return label_custom || label_default
   // useFeature(code): return boolean
   ```
-- [ ] Buat `src/lib/api/tenant.api.ts`:
+- [x] Buat `src/lib/api/tenant.api.ts`:
   ```ts
   export const tenantApi = {
     resolve: (slug: string) => axios.get(`/api/tenant/${slug}`),
@@ -155,8 +155,8 @@
     getFeatures: (id: number) => axios.get(`/api/tenant/${id}/features`),
   };
   ```
-- [ ] Update `src/config/` (jika ada) untuk include tenant slug config
-- [ ] Backward compat: jika TENANT_MODE=single, gunakan default tenant
+- [x] Update `src/config/` (jika ada) untuk include tenant slug config
+- [x] Backward compat: jika TENANT_MODE=single, gunakan default tenant
 
 **Files to create/modify**:
 - `src/types/domain/tenant.ts` [NEW]

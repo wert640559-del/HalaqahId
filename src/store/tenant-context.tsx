@@ -1,6 +1,8 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { tenantApi } from "@/lib/api/tenant.api";
+import { getTenantSlugFromUrl } from "@/utils/tenant";
 import type { Tenant, TenantBrand, TenantTerminology, TenantFeature } from "@/types";
 
 interface TenantContextType {
@@ -14,27 +16,8 @@ interface TenantContextType {
 
 const TenantContext = createContext<TenantContextType | undefined>(undefined);
 
-// Helper to determine the tenant slug from host or environment
-export const getTenantSlugFromUrl = (): string => {
-  const isSingleMode = import.meta.env.VITE_TENANT_MODE === "single";
-  if (isSingleMode) {
-    return import.meta.env.VITE_DEFAULT_TENANT_SLUG || "default";
-  }
-
-  const hostname = window.location.hostname;
-  const parts = hostname.split(".");
-
-  // Handle subdomain resolving (e.g., tenant-a.halaqah.id or tenant-a.localhost)
-  if (parts.length > 2) {
-    const subdomain = parts[0];
-    if (subdomain !== "www" && subdomain !== "app" && subdomain !== "admin") {
-      return subdomain;
-    }
-  }
-
-  // Fallback to configured default
-  return import.meta.env.VITE_DEFAULT_TENANT_SLUG || "default";
-};
+// Re-export getTenantSlugFromUrl for convenience
+export { getTenantSlugFromUrl };
 
 export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -54,27 +37,30 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({
   });
 
   const tenant = tenantResponse?.data || null;
-  const activeTenantId = tenant?.id_tenant || 1;
+  const activeTenantId = tenant?.id_tenant;
 
-  // Fetch branding info (parallel)
+  // Fetch branding info (parallel, dependent on tenant id)
   const { data: brandResponse, isLoading: isLoadingBrand } = useQuery({
     queryKey: ["tenant-brand", activeTenantId],
-    queryFn: () => tenantApi.getBrand(activeTenantId),
+    queryFn: () => tenantApi.getBrand(activeTenantId!),
+    enabled: !!activeTenantId,
     staleTime: 1000 * 60 * 10,
   });
 
-  // Fetch custom terminology mapping (parallel)
+  // Fetch custom terminology mapping (parallel, dependent on tenant id)
   const { data: terminologyResponse, isLoading: isLoadingTerminology } =
     useQuery({
       queryKey: ["tenant-terminology", activeTenantId],
-      queryFn: () => tenantApi.getTerminology(activeTenantId),
+      queryFn: () => tenantApi.getTerminology(activeTenantId!),
+      enabled: !!activeTenantId,
       staleTime: 1000 * 60 * 10,
     });
 
-  // Fetch active features gating (parallel)
+  // Fetch active features gating (parallel, dependent on tenant id)
   const { data: featuresResponse, isLoading: isLoadingFeatures } = useQuery({
     queryKey: ["tenant-features", activeTenantId],
-    queryFn: () => tenantApi.getFeatures(activeTenantId),
+    queryFn: () => tenantApi.getFeatures(activeTenantId!),
+    enabled: !!activeTenantId,
     staleTime: 1000 * 60 * 10,
   });
 
@@ -118,12 +104,12 @@ export const useTenant = () => {
   return context;
 };
 
-export const useTerminology = (code: string, fallback: string): string => {
+export const useTerminology = (code: string, fallback?: string): string => {
   const { terminology } = useTenant();
   const matched = terminology.find(
     (t) => t.kode_entity.toUpperCase() === code.toUpperCase()
   );
-  return matched?.label_custom || matched?.label_default || fallback;
+  return matched?.label_custom || matched?.label_default || fallback || code;
 };
 
 export const useFeature = (code: string): boolean => {
